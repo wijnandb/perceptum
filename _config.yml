@@ -37,8 +37,8 @@ plugins:
 collections:
   projecten:
     output: true
-    permalink: /projecten/:slug/
-  watches:
+    # permalink: /:collection/:slug/
+  horloges:
     output: true
-    permalink: /horloges/:slug/
+    permalink: /:collection/:slug/
    

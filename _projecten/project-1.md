@@ -1,5 +1,5 @@
 ---
-layout: project
+layout: default
 title: Project voorbeeld 1
 description: Een voorbeeldproject om te demonstreren hoe een projecten-post eruit zou kunnen zien.
 slug: project-1

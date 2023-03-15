@@ -13,9 +13,9 @@
 				<div class="col-md-3">
 					<h3>Projecten</h3>
 					<ul>
-						<li><a href="#">Link 1</a></li>
-						<li><a href="#">Link 2</a></li>
-						<li><a href="#">Link 3</a></li>
+						{% for project in site.projecten %}
+							<li><a href="{{ site.baseurl}}{{ project.url }}">{{ project.title }}</a></li>
+						{% endfor %}
 					</ul>
 				</div>
                 <div class="col-md-3">

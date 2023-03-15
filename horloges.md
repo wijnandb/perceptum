@@ -4,13 +4,13 @@ layout: default
 ---
 
 <div class="card-deck mb-3 text-center">
-    {% for project in site.watches %}
+    {% for project in site.horloges %}
         <div class="card mb-4 box-shadow">
             <img class="card-img-top rounded-circle mt-3 mx-auto d-block" src="{{ project.image }}" alt="{{ project.description }}">
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title">{{ project.title }}</h5>
                 <p class="card-text">{{ project.description }}</p>
-                <a href="/horloges/{{ project.slug }}" class="btn btn-primary mt-auto">Lees verder</a>
+                <a href="{{ site.baseurl}}{{ project.url }}" class="btn btn-primary mt-auto">Lees verder</a>
             </div>
         </div>
     {% endfor %}

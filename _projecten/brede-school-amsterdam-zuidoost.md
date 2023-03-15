@@ -1,6 +1,6 @@
 ---
 title: Brede School Amsterdam Zuidoost
-layout: project
+layout: default
 description: "This is the description of the project"
 slug: brede-school-amsterdam-zuidoost
 image: https://source.unsplash.com/random/   
