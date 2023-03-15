@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{ page.title }} - Perceptum</title>
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
+	<!-- Custom CSS -->
+	<style>
+        html {
+            font-size: 14px;
+        }
+        @media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        .container {
+            max-width: 960px;
+        }
+
+        .pricing-header {
+            max-width: 700px;
+        }
+
+        .card-deck .card {
+            min-width: 220px;
+        }
+
+        img {
+            max-width: 150px;
+            object-fit: contain;
+            object-position: center;
+        }
+
+        .border-top { border-top: 1px solid #e5e5e5; }
+        .border-bottom { border-bottom: 1px solid #e5e5e5; }
+
+        .box-shadow { box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05); }
+        
+		/* Navigation */
+		.navbar {
+			background-color: transparent;
+			transition: background-color 0.5s ease-in-out;
+            position: absolute;
+            width: 100%;
+		}
+
+        /* .navbar.fixed-top {
+            position: fixed;
+            top: 0;
+        } */
+
+        .navbar.fixed-top.scrolled {
+            background-color: #fff;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+        }
+
+		.navbar-brand {
+			margin-right: 50px;
+		}
+
+		.nav-link {
+			color: #333;
+		}
+
+        /* Navbar animation, hamburger to X */
+        .navbar-toggler:focus,
+        .navbar-toggler:active {
+            outline: 0;
+        }
+
+        /* hide close when burger shown */
+        .navbar-toggler.collapsed .close-icon {
+            display: none;
+        }
+
+        .navbar-toggler:not(.collapsed) .navbar-toggler-icon {
+            display: inline;
+        }
+
+		/* Header */
+		.header {
+			background-image: url("https://source.unsplash.com/random/1200x800");
+			background-attachment: fixed;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+			height: 500px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+            text-shadow: 2px 2px 4px #333;
+		}
+
+		.header h1 {
+			font-size: 50px;
+			margin-top: 0;
+			margin-bottom: 20px;
+		}
+
+		/* Footer */
+		.footer {
+			background-color: #0e0469;
+			color: white;
+			padding: 50px;
+			margin-top: 50px;
+		}
+
+		.footer h3 {
+			margin-top: 0;
+			font-size: 20px;
+			margin-bottom: 20px;
+			color: #fff;
+		}
+
+		.footer ul {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.footer li {
+			margin-bottom: 10px;
+		}
+
+		.footer a {
+			color: white;
+			text-decoration: none;
+			font-size: 16px;
+			transition: color 0.5s;
+		}
+
+		.footer a:hover {
+			color: #ccc;
+		}
+
+		.contact {
+			margin-top: 50px;
+		}
+
+		.contact p {
+			margin-top: 0;
+			margin-bottom: 20px;
+			color: #fff;
+		}
+
+		.contact a {
+			color: white;
+			text-decoration: none;
+			font-size: 16px;
+			transition: color 0.5s;
+		}
+
+		.contact a:hover {
+			color: #ccc;
+		}
+	</style>
+</head>
+<body>
+ {% include navigation.html %}
+
+	<!-- Header -->
+	<header class="header">
+		<div class="container">
+			<h1>{{ page.title }}</h1>
+		</div>
+	</header>
+
+	<!-- Main content -->
+
+
+	<div class="container my-5">
+		<div class="row">
+			<div class="col">
+                {{ content }}
+            </div>
+		</div>
+	</div>
+
+    {% include footer.html %}
+
+
+	<!-- Bootstrap JavaScript -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        // Get the navbar element
+        const navbar = document.querySelector('.navbar');
+
+        // Listen for scroll events on the window
+        window.addEventListener('scroll', () => {
+            // Check if the user has scrolled past the header
+            if (window.pageYOffset > 300) {
+                // Add the 'fixed-top' class to the navbar
+                navbar.classList.add('fixed-top');
+                // Add the 'scrolled' class to the navbar
+                navbar.classList.add('scrolled');
+            } else {
+                // Remove the 'fixed-top' class from the navbar
+                navbar.classList.remove('fixed-top');
+                // Remove the 'scrolled' class from the navbar
+                navbar.classList.remove('scrolled');
+        }
+        });
+    </script>
+
+</body>
+</html>

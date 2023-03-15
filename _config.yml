@@ -1,0 +1,44 @@
+title: Perceptum
+email: wijnand@baretta.nl
+description: >- # this means to ignore newlines until "baseurl:"
+  Perceptum is een digital agency gevestigd in Noordwijk, gespecialiseerd in het bieden van digitale oplossingen aan lokale ondernemers. 
+  Onze missie is om lokale bedrijven te helpen groeien en hun online aanwezigheid te versterken met behulp van 
+  innovatieve en op maat gemaakte digitale oplossingen.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
+twitter_username: wijnandb
+github_username:  wijnandb
+
+# Build settings
+theme: minima
+plugins:
+  - jekyll-feed
+
+# Exclude from processing.
+# The following items will not be processed, by default.
+# Any item listed under the `exclude:` key here will be automatically added to
+# the internal "default list".
+#
+# Excluded items can be processed by explicitly listing the directories or
+# their entries' file path in the `include:` list.
+#
+# exclude:
+#   - .sass-cache/
+#   - .jekyll-cache/
+#   - gemfiles/
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules/
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/
+
+collections:
+  projecten:
+    output: true
+    permalink: /projecten/:slug/
+  watches:
+    output: true
+    permalink: /horloges/:slug/
+   
