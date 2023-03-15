@@ -5,7 +5,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   Onze missie is om lokale bedrijven te helpen groeien en hun online aanwezigheid te versterken met behulp van 
   innovatieve en op maat gemaakte digitale oplossingen.
 baseurl: "/perceptum" # the subpath of your site, e.g. /blog
-url: "https://wijnandb.github.com" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://wijnandb.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: wijnandb
 github_username:  wijnandb
 
