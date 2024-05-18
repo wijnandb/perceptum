@@ -39,6 +39,6 @@ collections:
     output: true
     # permalink: /:collection/:slug/
   horloges:
-    output: true
+    output: false
     permalink: /:collection/:slug/
    
