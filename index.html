@@ -20,10 +20,15 @@
         }
         nav {
             background-color: #3949ab;
-            overflow: hidden;
+            width: 100%;
+        }
+        nav div {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
         }
         nav a {
-            float: left;
             display: block;
             color: white;
             text-align: center;
@@ -52,8 +57,6 @@
             color: white;
             text-align: center;
             padding: 10px;
-            position: fixed;
-            bottom: 0;
             width: 100%;
         }
         .contact-form {
@@ -79,8 +82,10 @@
             background-color: #3949ab;
         }
         @media (max-width: 768px) {
+            nav div {
+                flex-direction: column;
+            }
             nav a {
-                float: none;
                 width: 100%;
                 text-align: left;
                 padding-left: 20px;
