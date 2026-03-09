@@ -1,0 +1,40 @@
+baseURL = "https://perceptum.nl/"
+languageCode = "nl"
+title = "Perceptum"
+
+[params]
+  description = "Technologie die werkt voor jou"
+  author = "Wijnand Baretta"
+  email = "wijnand@perceptum.nl"
+  phone = "071 - 203 2103"
+  tagline = "Wij maken technologie eenvoudig"
+
+[menu]
+  [[menu.main]]
+    name = "Home"
+    url = "/"
+    weight = 1
+  [[menu.main]]
+    name = "Over ons"
+    url = "/about/"
+    weight = 2
+  [[menu.main]]
+    name = "Producten"
+    url = "/producten/"
+    weight = 3
+  [[menu.main]]
+    name = "Blog"
+    url = "/blog/"
+    weight = 4
+  [[menu.main]]
+    name = "Contact"
+    url = "/contact/"
+    weight = 5
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[outputs]
+  home = ["HTML", "RSS"]
