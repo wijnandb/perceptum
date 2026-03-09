@@ -11,7 +11,7 @@ Software bouwen is makkelijk. Aandacht is schaars. Iets bouwen betekent niet dat
 **De oplossing:** FormBridge is een formulier-backend voor statische sites. Maak een formulier via de API, plak de HTML op je site, en ontvang inzendingen in je mailbox. Spam wordt automatisch gefilterd. Geen database nodig aan jouw kant.
 
 **Status:** In gebruik voor eigen projecten. Binnenkort beschikbaar voor anderen.
-[Meer informatie →](/producten/formbridge/)
+[Meer informatie →]({{< ref "/producten/formbridge" >}})
 
 ---
 
