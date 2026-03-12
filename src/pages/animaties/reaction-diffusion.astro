@@ -1,0 +1,150 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Reaction-Diffusion" description="Turing-patronen — vlekken en strepen die ontstaan uit chaos.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Reaction-Diffusion</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">∂u/∂t = Dᵤ∇²u − uv² + F(1−u) — Turing's model voor biologische patronen.</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  // Gray-Scott parameters (coral/spots pattern)
+  const F = 0.055;
+  const k = 0.062;
+  const Du = 1.0;
+  const Dv = 0.5;
+  const stepsPerFrame = 4; // slower evolution
+
+  let cols: number;
+  let rows: number;
+  let u: Float32Array;
+  let v: Float32Array;
+  let uNext: Float32Array;
+  let vNext: Float32Array;
+  let frameCount = 0;
+
+  function idx(x: number, y: number): number {
+    return y * cols + x;
+  }
+
+  function init() {
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    // Downscale grid for performance
+    const scale = Math.max(1, Math.floor(canvas.width / 200));
+    cols = Math.floor(canvas.width / scale);
+    rows = Math.floor(canvas.height / scale);
+
+    const size = cols * rows;
+    u = new Float32Array(size).fill(1);
+    v = new Float32Array(size).fill(0);
+    uNext = new Float32Array(size);
+    vNext = new Float32Array(size);
+    frameCount = 0;
+
+    // Seed with very small perturbations — tiny amounts of v scattered as single pixels
+    // This creates a gentle, organic emergence rather than sudden blocks
+    for (let i = 0; i < size; i++) {
+      if (Math.random() < 0.01) {
+        v[i] = 0.05 + Math.random() * 0.1;
+        u[i] = 1 - v[i];
+      }
+    }
+    // Add a few small clusters for nucleation points
+    for (let p = 0; p < 5; p++) {
+      const cx = Math.floor(Math.random() * (cols - 10)) + 5;
+      const cy = Math.floor(Math.random() * (rows - 10)) + 5;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const i = idx(cx + dx, cy + dy);
+          v[i] = 0.15;
+          u[i] = 0.85;
+        }
+      }
+    }
+  }
+
+  function step() {
+    for (let y = 1; y < rows - 1; y++) {
+      for (let x = 1; x < cols - 1; x++) {
+        const i = idx(x, y);
+        const uVal = u[i];
+        const vVal = v[i];
+
+        // 5-point Laplacian stencil
+        const lapU = u[idx(x - 1, y)] + u[idx(x + 1, y)]
+                   + u[idx(x, y - 1)] + u[idx(x, y + 1)]
+                   - 4 * uVal;
+        const lapV = v[idx(x - 1, y)] + v[idx(x + 1, y)]
+                   + v[idx(x, y - 1)] + v[idx(x, y + 1)]
+                   - 4 * vVal;
+
+        const uvv = uVal * vVal * vVal;
+        uNext[i] = uVal + Du * lapU - uvv + F * (1 - uVal);
+        vNext[i] = vVal + Dv * lapV + uvv - (F + k) * vVal;
+      }
+    }
+
+    // Swap buffers
+    const tmpU = u; u = uNext; uNext = tmpU;
+    const tmpV = v; v = vNext; vNext = tmpV;
+  }
+
+  function render() {
+    const imgData = ctx.createImageData(canvas.width, canvas.height);
+    const data = imgData.data;
+    const scaleX = cols / canvas.width;
+    const scaleY = rows / canvas.height;
+
+    for (let py = 0; py < canvas.height; py++) {
+      const gy = Math.min(Math.floor(py * scaleY), rows - 1);
+      for (let px = 0; px < canvas.width; px++) {
+        const gx = Math.min(Math.floor(px * scaleX), cols - 1);
+        const vVal = v[idx(gx, gy)];
+
+        const offset = (py * canvas.width + px) * 4;
+        // Map v to blue color with alpha
+        const intensity = Math.min(1, vVal * 3);
+        data[offset] = Math.floor(59 * intensity);      // R
+        data[offset + 1] = Math.floor(130 * intensity);  // G
+        data[offset + 2] = Math.floor(246 * intensity);  // B
+        data[offset + 3] = Math.floor(255 * intensity);  // A
+      }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  function animate() {
+    for (let i = 0; i < stepsPerFrame; i++) {
+      step();
+    }
+    render();
+    requestAnimationFrame(animate);
+  }
+
+  init();
+  animate();
+
+  window.addEventListener('resize', () => {
+    init();
+  });
+</script>

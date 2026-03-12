@@ -1,0 +1,73 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Strange Attractor" description="Clifford/De Jong — duizenden punten die verborgen structuur onthullen.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Strange Attractor</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">x' = sin(a·y) + c·cos(a·x), y' = sin(b·x) + d·cos(b·y)</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  let a = -1.4, b = 1.6, c = 1.0, d = 0.7;
+  let x = 0, y = 0;
+  let animId = 0;
+  const dotsPerFrame = 5000;
+
+  function resize() {
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    x = 0;
+    y = 0;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function mapX(v: number) {
+    return ((v + 3) / 6) * canvas.width;
+  }
+
+  function mapY(v: number) {
+    return ((v + 3) / 6) * canvas.height;
+  }
+
+  function animate() {
+    // Slow fade for trails
+    ctx.fillStyle = 'rgba(12, 25, 41, 0.01)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+    for (let i = 0; i < dotsPerFrame; i++) {
+      const nx = Math.sin(a * y) + c * Math.cos(a * x);
+      const ny = Math.sin(b * x) + d * Math.cos(b * y);
+      x = nx;
+      y = ny;
+      ctx.fillRect(mapX(x), mapY(y), 1, 1);
+    }
+
+    // Very slowly drift parameters
+    a += (Math.random() - 0.5) * 0.0002;
+    b += (Math.random() - 0.5) * 0.0002;
+
+    animId = requestAnimationFrame(animate);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  animate();
+</script>

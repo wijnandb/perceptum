@@ -1,0 +1,185 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Sorting Visualizer" description="Algoritmen aan het werk — zie hoe bubblesort en quicksort denken.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Sorting Visualizer</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">O(n&sup2;) vs O(n&middot;log n)</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  const BAR_COLOR = 'rgba(59, 130, 246, 0.7)';
+  const HIGHLIGHT_COLOR = 'rgba(251, 191, 36, 0.9)';
+  const SORTED_FLASH = 'rgba(251, 191, 36, 0.7)';
+
+  let arr: number[] = [];
+  let highlighted: Set<number> = new Set();
+  let barCount = 80;
+  let phase: 'sorting' | 'done-flash' | 'pause' | 'reshuffle' = 'sorting';
+  let algorithmName = '';
+  let algorithmIndex = 0;
+  let sortGenerator: Generator<void, void, unknown> | null = null;
+  let flashStart = 0;
+  let pauseStart = 0;
+  let stepsPerFrame = 1;
+
+  function shuffle() {
+    arr = [];
+    for (let i = 0; i < barCount; i++) {
+      arr.push((i + 1) / barCount);
+    }
+    // Fisher-Yates
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    highlighted.clear();
+  }
+
+  function* bubbleSort() {
+    const n = arr.length;
+    for (let i = 0; i < n - 1; i++) {
+      for (let j = 0; j < n - i - 1; j++) {
+        highlighted.clear();
+        highlighted.add(j);
+        highlighted.add(j + 1);
+        if (arr[j] > arr[j + 1]) {
+          [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        }
+        yield;
+      }
+    }
+    highlighted.clear();
+  }
+
+  function* quickSort(lo = 0, hi = arr.length - 1): Generator<void, void, unknown> {
+    if (lo >= hi) return;
+
+    // Partition
+    const pivot = arr[hi];
+    let i = lo;
+    for (let j = lo; j < hi; j++) {
+      highlighted.clear();
+      highlighted.add(j);
+      highlighted.add(hi);
+      if (arr[j] < pivot) {
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        i++;
+      }
+      yield;
+    }
+    [arr[i], arr[hi]] = [arr[hi], arr[i]];
+    highlighted.clear();
+    highlighted.add(i);
+    yield;
+
+    yield* quickSort(lo, i - 1);
+    yield* quickSort(i + 1, hi);
+  }
+
+  const algorithms = [
+    { name: 'Bubble Sort', gen: () => bubbleSort(), speed: 4 },
+    { name: 'Quick Sort', gen: () => quickSort(), speed: 1 },
+  ];
+
+  function startAlgorithm() {
+    const algo = algorithms[algorithmIndex % algorithms.length];
+    algorithmName = algo.name;
+    stepsPerFrame = algo.speed;
+    shuffle();
+    sortGenerator = algo.gen();
+    phase = 'sorting';
+  }
+
+  function drawBars(time: number) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const padding = 40;
+    const barAreaW = w - padding * 2;
+    const barAreaH = h - padding * 2 - 40; // leave room for label
+    const barW = barAreaW / barCount;
+    const gap = Math.max(1, barW * 0.1);
+
+    // Draw algorithm name
+    ctx.font = '300 14px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(algorithmName, padding, padding + 10);
+
+    for (let i = 0; i < arr.length; i++) {
+      const barH = arr[i] * barAreaH;
+      const x = padding + i * barW + gap / 2;
+      const y = h - padding - barH;
+
+      if (phase === 'done-flash') {
+        const elapsed = time - flashStart;
+        const flash = Math.sin(elapsed / 150) > 0;
+        ctx.fillStyle = flash ? SORTED_FLASH : BAR_COLOR;
+      } else if (highlighted.has(i)) {
+        ctx.fillStyle = HIGHLIGHT_COLOR;
+      } else {
+        ctx.fillStyle = BAR_COLOR;
+      }
+
+      ctx.fillRect(x, y, barW - gap, barH);
+    }
+  }
+
+  function animate(time: number) {
+    if (phase === 'sorting' && sortGenerator) {
+      for (let i = 0; i < stepsPerFrame; i++) {
+        const result = sortGenerator.next();
+        if (result.done) {
+          phase = 'done-flash';
+          flashStart = time;
+          highlighted.clear();
+          break;
+        }
+      }
+    } else if (phase === 'done-flash') {
+      if (time - flashStart > 1500) {
+        phase = 'pause';
+        pauseStart = time;
+      }
+    } else if (phase === 'pause') {
+      if (time - pauseStart > 500) {
+        algorithmIndex++;
+        startAlgorithm();
+      }
+    }
+
+    drawBars(time);
+    requestAnimationFrame(animate);
+  }
+
+  function resize() {
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    barCount = Math.min(100, Math.max(40, Math.floor(canvas.width / 8)));
+    startAlgorithm();
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(animate);
+</script>

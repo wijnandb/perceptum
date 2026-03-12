@@ -1,0 +1,180 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Voronoi Diagram" description="Levende territoria die verschuiven als zaadpunten bewegen.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Voronoi Diagram</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">Elke pixel gekleurd op basis van de dichtstbijzijnde zaadpunt.</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+  const SCALE = 4;
+  const SEED_COUNT = 20;
+  const TARGET_INTERVAL = 1000 / 30;
+
+  const palette = [
+    [59, 130, 246, 0.30],
+    [99, 102, 241, 0.25],
+    [67, 56, 202, 0.28],
+    [79, 70, 229, 0.22],
+    [55, 48, 163, 0.26],
+    [30, 64, 175, 0.30],
+    [37, 99, 235, 0.24],
+    [96, 165, 250, 0.20],
+    [129, 140, 248, 0.22],
+    [49, 46, 129, 0.28],
+    [30, 58, 138, 0.32],
+    [56, 89, 182, 0.25],
+    [63, 63, 201, 0.27],
+    [45, 85, 200, 0.23],
+    [72, 118, 230, 0.26],
+    [88, 80, 216, 0.24],
+    [41, 72, 188, 0.29],
+    [52, 110, 235, 0.21],
+    [75, 60, 195, 0.27],
+    [34, 80, 220, 0.25],
+  ];
+
+  interface Seed {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    color: number[];
+  }
+
+  let seeds: Seed[] = [];
+  let w = 0;
+  let h = 0;
+  let sw = 0;
+  let sh = 0;
+  let offscreen: HTMLCanvasElement;
+  let offCtx: CanvasRenderingContext2D;
+
+  function resize() {
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    w = Math.round(rect.width);
+    h = Math.round(rect.height);
+    canvas.width = w;
+    canvas.height = h;
+    sw = Math.ceil(w / SCALE);
+    sh = Math.ceil(h / SCALE);
+    offscreen = document.createElement('canvas');
+    offscreen.width = sw;
+    offscreen.height = sh;
+    offCtx = offscreen.getContext('2d')!;
+  }
+
+  function initSeeds() {
+    seeds = [];
+    for (let i = 0; i < SEED_COUNT; i++) {
+      seeds.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+        color: palette[i % palette.length],
+      });
+    }
+  }
+
+  function updateSeeds() {
+    for (const s of seeds) {
+      s.x += s.vx;
+      s.y += s.vy;
+      if (s.x < 0) s.x += w;
+      if (s.x >= w) s.x -= w;
+      if (s.y < 0) s.y += h;
+      if (s.y >= h) s.y -= h;
+    }
+  }
+
+  function render() {
+    const img = offCtx.createImageData(sw, sh);
+    const data = img.data;
+    const ownerGrid = new Uint8Array(sw * sh);
+
+    const scaledSeeds = seeds.map(s => ({
+      sx: s.x / SCALE,
+      sy: s.y / SCALE,
+    }));
+
+    for (let y = 0; y < sh; y++) {
+      for (let x = 0; x < sw; x++) {
+        let minDist = Infinity;
+        let nearest = 0;
+        for (let i = 0; i < SEED_COUNT; i++) {
+          const dx = x - scaledSeeds[i].sx;
+          const dy = y - scaledSeeds[i].sy;
+          const d = dx * dx + dy * dy;
+          if (d < minDist) {
+            minDist = d;
+            nearest = i;
+          }
+        }
+        ownerGrid[y * sw + x] = nearest;
+        const c = seeds[nearest].color;
+        const idx = (y * sw + x) * 4;
+        data[idx] = c[0];
+        data[idx + 1] = c[1];
+        data[idx + 2] = c[2];
+        data[idx + 3] = Math.round(c[3] * 255);
+      }
+    }
+
+    // Draw boundary edges
+    for (let y = 1; y < sh - 1; y++) {
+      for (let x = 1; x < sw - 1; x++) {
+        const owner = ownerGrid[y * sw + x];
+        const right = ownerGrid[y * sw + x + 1];
+        const below = ownerGrid[(y + 1) * sw + x];
+        if (owner !== right || owner !== below) {
+          const idx = (y * sw + x) * 4;
+          data[idx] = 148;
+          data[idx + 1] = 163;
+          data[idx + 2] = 184;
+          data[idx + 3] = 100;
+        }
+      }
+    }
+
+    offCtx.putImageData(img, 0, 0);
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(offscreen, 0, 0, w, h);
+  }
+
+  let lastTime = 0;
+
+  function loop(timestamp: number) {
+    requestAnimationFrame(loop);
+    if (timestamp - lastTime < TARGET_INTERVAL) return;
+    lastTime = timestamp;
+    updateSeeds();
+    render();
+  }
+
+  resize();
+  initSeeds();
+  requestAnimationFrame(loop);
+
+  window.addEventListener('resize', () => {
+    resize();
+  });
+</script>

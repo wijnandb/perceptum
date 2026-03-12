@@ -1,0 +1,154 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Kaleidoscope" description="Symmetrische patronen — elke beweging wordt zes keer gespiegeld.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Kaleidoscope</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">6-voudige spiegelsymmetrie</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  interface Dot {
+    angle: number;
+    radius: number;
+    size: number;
+    alpha: number;
+    color: 'blue' | 'amber';
+    speed: number;
+    radialSpeed: number;
+    life: number;
+    maxLife: number;
+  }
+
+  const dots: Dot[] = [];
+  const SEGMENTS = 6;
+  const MAX_DOTS = 40;
+
+  function spawnDot() {
+    const maxR = Math.min(canvas.width, canvas.height) * 0.35;
+    dots.push({
+      angle: Math.random() * (Math.PI / SEGMENTS),
+      radius: 20 + Math.random() * maxR * 0.8,
+      size: 2 + Math.random() * 5,
+      alpha: 0,
+      color: Math.random() > 0.4 ? 'blue' : 'amber',
+      speed: (Math.random() - 0.5) * 0.003,
+      radialSpeed: (Math.random() - 0.5) * 0.3,
+      life: 0,
+      maxLife: 200 + Math.random() * 400,
+    });
+  }
+
+  // Seed initial dots
+  for (let i = 0; i < 20; i++) spawnDot();
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
+    // Spawn new dots
+    if (dots.length < MAX_DOTS && Math.random() < 0.08) {
+      spawnDot();
+    }
+
+    // Update and draw dots
+    for (let i = dots.length - 1; i >= 0; i--) {
+      const dot = dots[i];
+      dot.life++;
+      dot.angle += dot.speed;
+      dot.radius += dot.radialSpeed;
+
+      // Keep angle within wedge
+      const wedge = Math.PI / SEGMENTS;
+      if (dot.angle < 0) dot.angle = 0.01;
+      if (dot.angle > wedge) dot.angle = wedge - 0.01;
+
+      // Keep radius positive
+      const maxR = Math.min(canvas.width, canvas.height) * 0.35;
+      if (dot.radius < 15) { dot.radius = 15; dot.radialSpeed *= -1; }
+      if (dot.radius > maxR) { dot.radius = maxR; dot.radialSpeed *= -1; }
+
+      // Fade in and out
+      const fadeIn = Math.min(dot.life / 60, 1);
+      const fadeOut = Math.max(0, 1 - (dot.life - dot.maxLife + 60) / 60);
+      dot.alpha = fadeIn * (dot.life > dot.maxLife - 60 ? fadeOut : 1);
+
+      if (dot.life > dot.maxLife) {
+        dots.splice(i, 1);
+        continue;
+      }
+
+      const r = dot.color === 'blue'
+        ? `rgba(59, 130, 246, ${dot.alpha * 0.7})`
+        : `rgba(251, 191, 36, ${dot.alpha * 0.6})`;
+
+      // Draw in all 6 segments (with mirrors)
+      for (let s = 0; s < SEGMENTS; s++) {
+        const baseAngle = (s * 2 * Math.PI) / SEGMENTS;
+
+        // Normal
+        const a1 = baseAngle + dot.angle;
+        const x1 = cx + dot.radius * Math.cos(a1);
+        const y1 = cy + dot.radius * Math.sin(a1);
+
+        ctx.beginPath();
+        ctx.arc(x1, y1, dot.size, 0, Math.PI * 2);
+        ctx.fillStyle = r;
+        ctx.fill();
+
+        // Mirrored
+        const a2 = baseAngle - dot.angle;
+        const x2 = cx + dot.radius * Math.cos(a2);
+        const y2 = cy + dot.radius * Math.sin(a2);
+
+        ctx.beginPath();
+        ctx.arc(x2, y2, dot.size, 0, Math.PI * 2);
+        ctx.fillStyle = r;
+        ctx.fill();
+      }
+    }
+
+    // Draw subtle guide lines
+    for (let s = 0; s < SEGMENTS; s++) {
+      const a = (s * 2 * Math.PI) / SEGMENTS;
+      const maxR = Math.min(canvas.width, canvas.height) * 0.38;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + maxR * Math.cos(a), cy + maxR * Math.sin(a));
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>

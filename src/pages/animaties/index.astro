@@ -1,0 +1,61 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const animations = [
+  { name: 'Lissajous Curves', slug: 'lissajous', description: 'Harmonograph — twee sinusgolven die samen complexe patronen tekenen.' },
+  { name: 'Voronoi Diagram', slug: 'voronoi', description: 'Levende territoria die verschuiven als zaadpunten bewegen.' },
+  { name: 'Lorenz Attractor', slug: 'lorenz', description: 'De beroemde vlindervormige chaotische baan die nooit herhaalt.' },
+  { name: 'Fibonacci Spiral', slug: 'fibonacci', description: 'De gulden rechthoek — Fibonacci\'s spiraal opgebouwd uit perfecte verhoudingen.' },
+  { name: 'Fourier Epicycles', slug: 'fourier', description: 'Roterende cirkels die samenwerken om vormen te tekenen.' },
+  { name: 'Reaction-Diffusion', slug: 'reaction-diffusion', description: 'Turing-patronen — vlekken en strepen die ontstaan uit chaos.' },
+  { name: 'Strange Attractor', slug: 'strange-attractor', description: 'Clifford/De Jong — duizenden punten die verborgen structuur onthullen.' },
+  { name: 'Spirograph', slug: 'spirograph', description: 'Roulettecurven — cirkels die binnen cirkels rollen en prachtige patronen tekenen.' },
+  { name: 'Kaleidoscope', slug: 'kaleidoscope', description: 'Symmetrische patronen — elke beweging wordt zes keer gespiegeld.' },
+  { name: 'Turtle Graphics', slug: 'turtle', description: 'Een schildpad volgt simpele regels en tekent fractale patronen.' },
+  { name: 'Bouncing Balls', slug: 'bouncing-balls', description: 'Zwaartekracht en botsingen — ballen die stuiteren met kleursporen.' },
+  { name: 'Pendulum Wave', slug: 'pendulum-wave', description: 'Vijftien slingers die samen golven creëren — sync, desync, en weer terug.' },
+  { name: 'Gravity Slingshot', slug: 'gravity-slingshot', description: 'Zwaartekrachtvelden — deeltjes die afbuigen rond massa\'s.' },
+  { name: 'Flocking', slug: 'flocking', description: 'Zwermgedrag — simpele regels, complexe patronen. Zoals vogels en vissen.' },
+  { name: 'Fractal Tree', slug: 'fractal-tree', description: 'Recursieve vertakkingen — een boom die groeit vanuit wiskundige regels.' },
+  { name: 'Regenval', slug: 'rain', description: 'Vallende druppels met spateffect — digitale regen op je scherm.' },
+  { name: 'Maze Generator', slug: 'maze', description: 'Doolhof-algoritme — kijk hoe het pad zich ontvouwt, stap voor stap.' },
+  { name: 'Sorting Visualizer', slug: 'sorting', description: 'Algoritmen aan het werk — zie hoe bubblesort en quicksort denken.' },
+  { name: 'Sierpinski Driehoek', slug: 'sierpinski', description: 'Het chaos-spel — willekeurige punten die orde scheppen uit niets.' },
+  { name: 'Geometrische Spirograaf', slug: 'geometric-spirograph', description: 'Teken een figuur, draai, herhaal — wanneer 360 deelbaar is, ontstaat symmetrie.' },
+];
+---
+
+<Layout
+  title="Animaties"
+  description="Wiskundige animaties gebouwd door Perceptum. Van Conway's Game of Life tot Lorenz attractors."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <p class="text-accent font-medium text-sm tracking-wide uppercase mb-4">Lab</p>
+      <h1 class="heading-xl text-white mb-6">Animaties</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Wiskundige schoonheid, in de browser.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {animations.map((anim) => (
+          <a href={`/animaties/${anim.slug}/`} class="block group">
+            <div class="card p-6 h-full">
+              <h2 class="font-bold text-navy-900 group-hover:text-accent transition-colors mb-2">{anim.name}</h2>
+              <p class="text-sm text-slate-500">{anim.description}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

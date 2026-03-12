@@ -1,0 +1,353 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CTA from '../../components/CTA.astro';
+
+interface Project {
+  name: string;
+  period: string;
+  sortYear: number;
+  client?: string;
+  description: string;
+  status?: 'Actief';
+  tags?: string[];
+  href?: string;
+  id?: string;
+}
+
+const eras: { label: string; period: string; projects: Project[] }[] = [
+  {
+    label: 'AI & Eigen Producten',
+    period: '2020–heden',
+    projects: [
+      {
+        name: 'AI Chatbot',
+        period: '2024–heden',
+        sortYear: 2024,
+        id: 'chatbot',
+        description: 'Chatbot die organisatiekennisbanken doorzoekbaar maakt via natuurlijke taal. Beantwoordt klantvragen 24/7, vermindert de druk op servicedesks.',
+        status: 'Actief',
+        tags: ['AI', 'Klantenservice', 'Automatisering'],
+      },
+      {
+        name: 'FormBridge',
+        period: '2024–heden',
+        sortYear: 2024,
+        description: 'Eigen product: formulieren-backend voor statische websites. Verwerkt duizenden inzendingen per maand, volledig GDPR-compliant en zonder vendor lock-in.',
+        status: 'Actief',
+        href: '/projecten/formbridge/',
+        tags: ['Product', 'API', 'Privacy'],
+      },
+      {
+        name: 'Brede School Zuidoost',
+        period: '2020–heden',
+        sortYear: 2020,
+        id: 'brede-school',
+        client: 'PPOZO',
+        description: 'Registratieplatform waarmee scholen in Amsterdam Zuidoost hun naschoolse activiteiten organiseren. Honderden inschrijvingen per periode.',
+        status: 'Actief',
+        tags: ['Platform', 'Educatie', 'Primair Onderwijs'],
+      },
+    ],
+  },
+  {
+    label: 'Platforms & Educatie',
+    period: '2008–2020',
+    projects: [
+      {
+        name: 'LeesMeer',
+        period: '2016–2019',
+        sortYear: 2016,
+        client: 'Eigen initiatief',
+        description: 'Digitaal leesplatform tegen taalachterstand bij kinderen. Bood divers leesmateriaal en inkijkexemplaren van kinderboeken aan. Later ingezet op Bonaire voor leerlingen met leesachterstand.',
+        tags: ['EdTech', 'Lezen', 'Kinderen'],
+      },
+      {
+        name: 'CodeCult',
+        period: '2015–2023',
+        sortYear: 2015,
+        client: 'Eigen initiatief',
+        description: 'Programmeerworkshops voor kinderen van 9 tot 14 jaar. Op locatie bij basisscholen door heel Nederland, inclusief summerschools in Utrecht.',
+        tags: ['Educatie', 'Programmeren', 'Kinderen'],
+      },
+      {
+        name: 'Incision',
+        period: '2014–2015',
+        sortYear: 2014,
+        client: 'Incision Group',
+        description: 'Platform voor chirurgische training, van nul opgebouwd tot wereldwijd product. In gebruik bij ziekenhuizen en medische opleidingen in meerdere landen. API-ontwikkeling, Q&A-systeem en website.',
+        tags: ['MedTech', 'Platform', 'API'],
+      },
+      {
+        name: 'Khan Academy NL',
+        period: '2013–2016',
+        sortYear: 2013,
+        client: 'KhanAcademie.nl',
+        description: 'Bijdrage aan het toegankelijk maken van Khan Academy-content voor het Nederlandse onderwijs.',
+        tags: ['Educatie', 'Open Source'],
+      },
+    ],
+  },
+  {
+    label: 'Mobiel Pionieren',
+    period: '1999–2007',
+    projects: [
+      {
+        name: 'Sportsplaza',
+        period: '2004–2007',
+        sortYear: 2004,
+        client: 'Sportsplaza',
+        description: 'Mobiel sportnieuwsplatform met exclusieve Eredivisie-doelpuntbeelden via Vodafone Live en KPN i-mode. Winnaar I-mode Vak Award 2005.',
+        tags: ['Mobiel', 'Sport', 'Award'],
+      },
+      {
+        name: 'Rabobank Rondemaster',
+        period: '2003–2007',
+        sortYear: 2003,
+        client: 'Rabobank',
+        description: 'Fantasy wielerspel rond de Tour de France. Samenbrengen van wielerfans en bankklanten op één platform.',
+        tags: ['Fantasy Sport', 'Platform'],
+      },
+      {
+        name: 'Ajax, PSV & Feyenoord',
+        period: '2003–2006',
+        sortYear: 2003,
+        client: 'Eredivisie Top 3',
+        description: 'De allereerste mobiele websites voor de drie grootste voetbalclubs van Nederland.',
+        tags: ['Mobiel', 'Sport', 'Eerste in NL'],
+      },
+      {
+        name: 'Eredivisie Profcoach',
+        period: '2002–2015',
+        sortYear: 2002,
+        client: 'Eredivisie / FOX Sports',
+        description: 'Een van de eerste fantasy football-platforms van Nederland. Op het hoogtepunt honderdduizenden deelnemers per seizoen. 13 jaar in productie, later co-branded met FOX Sports.',
+        tags: ['Fantasy Sport', 'Platform', 'Schaal'],
+      },
+      {
+        name: 'Vodafone Goal Alert',
+        period: '2002–2006',
+        sortYear: 2002,
+        client: 'Vodafone',
+        description: 'Real-time doelpuntmeldingen via mobiel. Pionierswerk in mobiele sportnotificaties.',
+        tags: ['Mobiel', 'Real-time', 'Vodafone'],
+      },
+      {
+        name: 'KPN i-mode',
+        period: '2002–2005',
+        sortYear: 2002,
+        client: 'KPN',
+        description: 'Content en diensten voor het i-mode platform, een van de eerste mobiele ecosystemen in Europa.',
+        tags: ['Mobiel', 'KPN', 'Platform'],
+      },
+    ],
+  },
+];
+---
+
+<Layout
+  title="Projecten"
+  description="25 jaar digitale projecten. Van de eerste mobiele websites voor Ajax en Vodafone tot AI-chatbots en eigen producten. Perceptum — Wijnand Baretta."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <!-- Conway's Game of Life -->
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="conway" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <h1 class="heading-xl text-white mb-6">25 jaar bouwen</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Van de eerste mobiele websites in Nederland tot de AI-toepassingen van vandaag. Een overzicht van waar wij aan hebben gewerkt.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+
+      {eras.map((era, eraIndex) => (
+        <div class={`relative ${eraIndex > 0 ? 'mt-20' : ''}`}>
+
+          {/* Era header */}
+          <div class="flex items-center gap-4 mb-10 animate-on-scroll">
+            <div class="flex items-center gap-3">
+              <div class={`w-4 h-4 rounded-full ${eraIndex === 0 ? 'bg-accent shadow-lg shadow-accent/30' : 'bg-slate-300'}`}>
+                {eraIndex === 0 && (
+                  <div class="w-4 h-4 rounded-full bg-accent animate-ping opacity-30" />
+                )}
+              </div>
+              <h2 class="heading-lg text-navy-900">{era.label}</h2>
+            </div>
+            <span class="text-sm text-slate-400 font-medium">{era.period}</span>
+            <div class="flex-1 h-px bg-slate-200" />
+          </div>
+
+          {/* Projects in this era */}
+          <div class="relative ml-2 pl-8 border-l-2 border-slate-200">
+            <div class="space-y-8">
+              {era.projects.map((project) => (
+                <div id={project.id} class="relative animate-on-scroll">
+                  {/* Timeline dot */}
+                  <div class={`absolute -left-[calc(2rem+5px)] top-2 w-3 h-3 rounded-full border-2 ${
+                    project.status
+                      ? 'bg-emerald-500 border-emerald-500'
+                      : 'bg-white border-slate-300'
+                  }`} />
+
+                  <div class={`card p-6 md:p-8 ${project.status ? 'border-emerald-200/60 hover:border-emerald-300/60' : ''}`}>
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
+                      <div>
+                        <div class="flex items-center gap-3 flex-wrap">
+                          <h3 class="heading-sm text-navy-900">{project.name}</h3>
+                          {project.status && (
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1.5">
+                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              {project.status}
+                            </span>
+                          )}
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                          <span class="text-sm text-slate-400">{project.period}</span>
+                          {project.client && (
+                            <>
+                              <span class="text-slate-300">&middot;</span>
+                              <span class="text-sm text-accent font-medium">{project.client}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <p class="text-slate-600 leading-relaxed mb-4">{project.description}</p>
+
+                    {project.tags && (
+                      <div class="flex flex-wrap gap-2">
+                        {project.tags.map((tag) => (
+                          <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-medium">{tag}</span>
+                        ))}
+                      </div>
+                    )}
+
+                    {project.href && (
+                      <a href={project.href} class="inline-flex items-center gap-1 text-sm font-medium text-accent mt-4 hover:underline">
+                        Meer over {project.name}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {/* Pascolo origin story */}
+      <div class="relative ml-2 pl-8 border-l-2 border-slate-200 pt-10 animate-on-scroll">
+        <div class="absolute -left-[5px] top-12 w-3 h-3 rounded-full bg-slate-300 border-2 border-slate-300" />
+        <div class="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-200/60 p-6 md:p-8">
+          <div class="flex items-center gap-3 mb-4">
+            <h3 class="heading-sm text-navy-900">Pascolo</h3>
+            <span class="text-sm text-slate-400">1999&ndash;2007</span>
+          </div>
+          <div class="space-y-3 text-slate-600 text-sm leading-relaxed">
+            <p>
+              Waar het allemaal begon. In 1999 richtte Wijnand Baretta digitaal bureau Pascolo op in Amsterdam. In acht jaar groeide het bureau van nul naar 35 medewerkers, met kantoren in Amsterdam en Izmir. Pascolo bouwde voor Ajax, Vodafone, KPN, Rabobank en de Eredivisie.
+            </p>
+            <p>
+              Na de overdracht aan het team in 2007 ging het bureau verder als Relephant. In 2013 werd Relephant overgenomen door het Belgische <span class="font-medium text-navy-900">Emakina Group</span> (beursgenoteerd, 1.100+ medewerkers, 18 landen). In 2021 werd Emakina op haar beurt overgenomen door <span class="font-medium text-navy-900">EPAM Systems</span> (NYSE: EPAM), een van de grootste technologiebedrijven ter wereld met 55.000+ medewerkers.
+            </p>
+            <p class="text-slate-400 italic">
+              Als aandeelhouder bleef Wijnand betrokken tot de afronding van de EPAM-overname in 2021 &mdash; een traject van startup tot beursgenoteerde multinational.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-medium">Pascolo</span>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-medium">&rarr; Relephant</span>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-medium">&rarr; Emakina</span>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-medium">&rarr; EPAM (NYSE)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTA />
+</Layout>
+
+<script>
+  const canvas = document.getElementById('conway') as HTMLCanvasElement;
+  if (canvas) {
+    const ctx = canvas.getContext('2d')!;
+    const cellSize = 8;
+    let cols: number, rows: number;
+    let grid: Uint8Array;
+    const cellColor = 'rgba(59,130,246,0.4)';
+
+    function resize() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      cols = Math.ceil(canvas.width / cellSize);
+      rows = Math.ceil(canvas.height / cellSize);
+      grid = new Uint8Array(cols * rows);
+      for (let i = 0; i < grid.length; i++) {
+        grid[i] = Math.random() < 0.3 ? 1 : 0;
+      }
+    }
+
+    function step() {
+      const next = new Uint8Array(cols * rows);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          let n = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dx === 0 && dy === 0) continue;
+              n += grid[((y + dy + rows) % rows) * cols + ((x + dx + cols) % cols)];
+            }
+          }
+          const i = y * cols + x;
+          if (grid[i]) {
+            next[i] = (n === 2 || n === 3) ? 1 : 0;
+          } else {
+            next[i] = n === 3 ? 1 : 0;
+          }
+        }
+      }
+      grid = next;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = cellColor;
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          if (grid[y * cols + x]) {
+            ctx.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+          }
+        }
+      }
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    let last = 0;
+    function loop(t: number) {
+      if (t - last > 200) {
+        step();
+        draw();
+        last = t;
+      }
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  }
+</script>

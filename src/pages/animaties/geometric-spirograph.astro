@@ -1,0 +1,298 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Geometrische Spirograaf" description="Teken een figuur, draai, herhaal — simpele regels, verbluffende symmetrie.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Geometrische Spirograaf</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">Teken, draai, herhaal — wanneer 360 deelbaar is door de hoek, ontstaat perfecte symmetrie</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  // --- Figure drawing functions ---
+  // Each draws a figure centered at (0,0) at the given radius
+
+  type DrawFn = (ctx: CanvasRenderingContext2D, radius: number) => void;
+
+  const figures: Record<string, DrawFn> = {
+    polygon(ctx, radius, sides = 4) {
+      ctx.beginPath();
+      for (let i = 0; i <= sides; i++) {
+        const a = (Math.PI * 2 * i) / sides - Math.PI / 2;
+        const x = radius * Math.cos(a);
+        const y = radius * Math.sin(a);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+    },
+    circle(ctx, radius) {
+      ctx.beginPath();
+      // Circle offset from center — creates flower-of-life when rotated
+      ctx.arc(radius * 0.5, 0, radius * 0.5, 0, Math.PI * 2);
+      ctx.closePath();
+    },
+    ellipse(ctx, radius) {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, radius, radius * 0.4, 0, 0, Math.PI * 2);
+      ctx.closePath();
+    },
+    star(ctx, radius) {
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const a = (Math.PI * 2 * i) / 10 - Math.PI / 2;
+        const r = i % 2 === 0 ? radius : radius * 0.4;
+        const x = r * Math.cos(a);
+        const y = r * Math.sin(a);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+    },
+    cross(ctx, radius) {
+      const w = radius * 0.2;
+      ctx.beginPath();
+      ctx.moveTo(-w, -radius);
+      ctx.lineTo(w, -radius);
+      ctx.lineTo(w, -w);
+      ctx.lineTo(radius, -w);
+      ctx.lineTo(radius, w);
+      ctx.lineTo(w, w);
+      ctx.lineTo(w, radius);
+      ctx.lineTo(-w, radius);
+      ctx.lineTo(-w, w);
+      ctx.lineTo(-radius, w);
+      ctx.lineTo(-radius, -w);
+      ctx.lineTo(-w, -w);
+      ctx.closePath();
+    },
+    arc(ctx, radius) {
+      ctx.beginPath();
+      // Half circle offset — creates shell patterns
+      ctx.arc(radius * 0.4, 0, radius * 0.6, -Math.PI * 0.5, Math.PI * 0.5);
+      // Don't close — open arc
+    },
+    crescent(ctx, radius) {
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, -Math.PI * 0.4, Math.PI * 0.4);
+      ctx.arc(radius * 0.3, 0, radius * 0.75, Math.PI * 0.35, -Math.PI * 0.35, true);
+      ctx.closePath();
+    },
+    line(ctx, radius) {
+      ctx.beginPath();
+      ctx.moveTo(-radius, 0);
+      ctx.lineTo(radius, 0);
+    },
+    lemniscate(ctx, radius) {
+      ctx.beginPath();
+      const steps = 80;
+      for (let i = 0; i <= steps; i++) {
+        const t = (Math.PI * 2 * i) / steps;
+        const denom = 1 + Math.sin(t) * Math.sin(t);
+        const x = (radius * Math.cos(t)) / denom;
+        const y = (radius * Math.sin(t) * Math.cos(t)) / denom;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+    },
+    spiral(ctx, radius) {
+      ctx.beginPath();
+      const turns = 2;
+      const steps = 60;
+      for (let i = 0; i <= steps; i++) {
+        const t = (turns * Math.PI * 2 * i) / steps;
+        const r = (radius * i) / steps;
+        const x = r * Math.cos(t);
+        const y = r * Math.sin(t);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+    },
+  };
+
+  interface Pattern {
+    figure: string;
+    sides?: number;  // only for polygon
+    angle: number;
+    label: string;
+  }
+
+  const patterns: Pattern[] = [
+    // Original polygons
+    { figure: 'polygon', sides: 4, angle: 10, label: 'Vierkant · 10°' },
+    { figure: 'polygon', sides: 3, angle: 15, label: 'Driehoek · 15°' },
+    // Circles — flower of life
+    { figure: 'circle',  angle: 30, label: 'Cirkel · 30°' },
+    { figure: 'circle',  angle: 15, label: 'Cirkel · 15°' },
+    // Ellipses — petal patterns
+    { figure: 'ellipse', angle: 12, label: 'Ellips · 12°' },
+    { figure: 'ellipse', angle: 20, label: 'Ellips · 20°' },
+    // Stars — sacred geometry
+    { figure: 'star',    angle: 24, label: 'Ster · 24°' },
+    { figure: 'star',    angle: 9,  label: 'Ster · 9°' },
+    // Crosses — woven patterns
+    { figure: 'cross',   angle: 15, label: 'Kruis · 15°' },
+    // Arcs — shell patterns
+    { figure: 'arc',     angle: 12, label: 'Boog · 12°' },
+    { figure: 'arc',     angle: 8,  label: 'Boog · 8°' },
+    // Crescents — Islamic geometry
+    { figure: 'crescent', angle: 18, label: 'Halve maan · 18°' },
+    { figure: 'crescent', angle: 10, label: 'Halve maan · 10°' },
+    // Lines — starburst
+    { figure: 'line',    angle: 10, label: 'Lijn · 10°' },
+    { figure: 'line',    angle: 5,  label: 'Lijn · 5°' },
+    // Lemniscate — interlocking loops
+    { figure: 'lemniscate', angle: 15, label: 'Lemniscaat · 15°' },
+    { figure: 'lemniscate', angle: 9,  label: 'Lemniscaat · 9°' },
+    // Spiral arms — galaxy / pinwheel
+    { figure: 'spiral',  angle: 24, label: 'Spiraal · 24°' },
+    { figure: 'spiral',  angle: 12, label: 'Spiraal · 12°' },
+    // Dense polygon originals
+    { figure: 'polygon', sides: 5, angle: 12, label: 'Vijfhoek · 12°' },
+    { figure: 'polygon', sides: 6, angle: 9,  label: 'Zeshoek · 9°' },
+    { figure: 'polygon', sides: 8, angle: 20, label: 'Achthoek · 20°' },
+    { figure: 'polygon', sides: 4, angle: 5,  label: 'Vierkant · 5°' },
+  ];
+
+  let patternIndex = 0;
+  let currentStep = 0;
+  let phase: 'drawing' | 'holding' | 'fading' | 'waiting' = 'drawing';
+  let fadeAlpha = 1;
+  let holdFrames = 0;
+  let waitFrames = 0;
+  let offscreen: HTMLCanvasElement;
+  let offCtx: CanvasRenderingContext2D;
+
+  function drawFigure(
+    context: CanvasRenderingContext2D,
+    cx: number,
+    cy: number,
+    radius: number,
+    pattern: Pattern,
+    rotation: number,
+    color: string,
+    alpha: number
+  ) {
+    context.save();
+    context.translate(cx, cy);
+    context.rotate(rotation);
+    context.globalAlpha = alpha;
+    context.strokeStyle = color;
+    context.lineWidth = 1.5;
+
+    if (pattern.figure === 'polygon') {
+      figures.polygon(context, radius, pattern.sides);
+    } else {
+      const drawFn = figures[pattern.figure];
+      if (drawFn) drawFn(context, radius);
+    }
+
+    context.stroke();
+    context.globalAlpha = 1;
+    context.restore();
+  }
+
+  function init() {
+    const w = canvas.width;
+    const h = canvas.height;
+    offscreen = document.createElement('canvas');
+    offscreen.width = w;
+    offscreen.height = h;
+    offCtx = offscreen.getContext('2d')!;
+    offCtx.clearRect(0, 0, w, h);
+    currentStep = 0;
+    phase = 'drawing';
+    fadeAlpha = 1;
+  }
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+    init();
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  function animate() {
+    const p = patterns[patternIndex];
+    const totalSteps = 360 / p.angle;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const radius = Math.min(canvas.width, canvas.height) * 0.3;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (phase === 'drawing') {
+      if (currentStep < totalSteps) {
+        const rotation = (currentStep * p.angle * Math.PI) / 180;
+        const hue = (currentStep / totalSteps) * 360;
+        const color = `hsl(${hue}, 70%, 60%)`;
+        drawFigure(offCtx, cx, cy, radius, p, rotation, color, 0.7);
+        currentStep++;
+      } else {
+        phase = 'holding';
+        holdFrames = 90;
+      }
+    } else if (phase === 'holding') {
+      holdFrames--;
+      if (holdFrames <= 0) {
+        phase = 'fading';
+      }
+    } else if (phase === 'fading') {
+      fadeAlpha -= 0.02;
+      if (fadeAlpha <= 0) {
+        fadeAlpha = 0;
+        phase = 'waiting';
+        waitFrames = 20;
+      }
+    } else if (phase === 'waiting') {
+      waitFrames--;
+      if (waitFrames <= 0) {
+        patternIndex = (patternIndex + 1) % patterns.length;
+        init();
+      }
+    }
+
+    // Draw label
+    if (phase !== 'waiting') {
+      ctx.globalAlpha = fadeAlpha;
+      ctx.font = '16px Inter, system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.8)';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.label, cx, canvas.height - 40);
+
+      if (phase === 'drawing') {
+        ctx.fillStyle = 'rgba(203, 213, 225, 0.5)';
+        ctx.fillText(`${currentStep} / ${totalSteps}`, cx, canvas.height - 20);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Composite offscreen
+    ctx.globalAlpha = fadeAlpha;
+    ctx.drawImage(offscreen, 0, 0);
+    ctx.globalAlpha = 1;
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+</script>

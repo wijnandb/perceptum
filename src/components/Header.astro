@@ -1,0 +1,124 @@
+---
+const navItems = [
+  { label: 'Over Perceptum', href: '/over/' },
+  { label: 'Projecten', href: '/projecten/' },
+  { label: 'Inzichten', href: '/inzichten/' },
+];
+---
+
+<header
+  id="site-header"
+  class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent"
+>
+  <nav class="container-wide mx-auto px-6 flex items-center justify-between h-20">
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-3 group">
+      <div class="w-9 h-9 rounded-lg gradient-navy flex items-center justify-center shadow-lg shadow-navy-900/20 group-hover:shadow-navy-900/40 transition-shadow">
+        <span class="text-white font-bold text-lg">P</span>
+      </div>
+      <span id="logo-text" class="text-xl font-bold text-white tracking-tight">
+        Perceptum
+      </span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <div class="hidden md:flex items-center gap-8">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-accent after:transition-all hover:after:w-full"
+        >
+          {item.label}
+        </a>
+      ))}
+      <a href="/contact/" class="btn-primary text-sm !px-5 !py-2.5">
+        Contact
+      </a>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button
+      id="mobile-menu-btn"
+      class="md:hidden flex flex-col gap-1.5 p-2"
+      aria-label="Menu openen"
+    >
+      <span class="block w-6 h-0.5 bg-white transition-all duration-300 origin-center" id="bar1"></span>
+      <span class="block w-6 h-0.5 bg-white transition-all duration-300" id="bar2"></span>
+      <span class="block w-4 h-0.5 bg-white transition-all duration-300 origin-center" id="bar3"></span>
+    </button>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div
+    id="mobile-menu"
+    class="md:hidden fixed inset-0 top-20 bg-white/95 backdrop-blur-lg transform translate-x-full transition-transform duration-300 ease-in-out z-40"
+  >
+    <div class="flex flex-col items-center gap-6 pt-12">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class="text-lg font-medium text-navy-900 hover:text-accent transition-colors"
+        >
+          {item.label}
+        </a>
+      ))}
+      <a href="/contact/" class="btn-primary mt-4">
+        Contact
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Spacer for fixed header -->
+<div class="h-20"></div>
+
+<script>
+  const header = document.getElementById('site-header');
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const bar1 = document.getElementById('bar1');
+  const bar2 = document.getElementById('bar2');
+  const bar3 = document.getElementById('bar3');
+  let menuOpen = false;
+
+  const logoText = document.getElementById('logo-text');
+  const navLinks = header?.querySelectorAll('.nav-link');
+  const bars = [bar1, bar2, bar3];
+
+  // Scroll behavior — add background on scroll
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) {
+      header?.classList.add('bg-white/90', 'backdrop-blur-lg', 'shadow-sm', 'border-b', 'border-slate-200/60');
+      header?.classList.remove('bg-transparent');
+      logoText?.classList.replace('text-white', 'text-navy-900');
+      navLinks?.forEach(l => { l.classList.replace('text-slate-200', 'text-slate-600'); });
+      bars.forEach(b => { b?.classList.replace('bg-white', 'bg-navy-900'); });
+    } else {
+      header?.classList.remove('bg-white/90', 'backdrop-blur-lg', 'shadow-sm', 'border-b', 'border-slate-200/60');
+      header?.classList.add('bg-transparent');
+      logoText?.classList.replace('text-navy-900', 'text-white');
+      navLinks?.forEach(l => { l.classList.replace('text-slate-600', 'text-slate-200'); });
+      bars.forEach(b => { b?.classList.replace('bg-navy-900', 'bg-white'); });
+    }
+  });
+
+  // Mobile menu toggle
+  menuBtn?.addEventListener('click', () => {
+    menuOpen = !menuOpen;
+    if (menuOpen) {
+      mobileMenu?.classList.remove('translate-x-full');
+      mobileMenu?.classList.add('translate-x-0');
+      bar1?.classList.add('rotate-45', 'translate-y-[4px]');
+      bar2?.classList.add('opacity-0');
+      bar3?.classList.add('-rotate-45', '-translate-y-[4px]', 'w-6');
+      document.body.style.overflow = 'hidden';
+    } else {
+      mobileMenu?.classList.add('translate-x-full');
+      mobileMenu?.classList.remove('translate-x-0');
+      bar1?.classList.remove('rotate-45', 'translate-y-[4px]');
+      bar2?.classList.remove('opacity-0');
+      bar3?.classList.remove('-rotate-45', '-translate-y-[4px]', 'w-6');
+      document.body.style.overflow = '';
+    }
+  });
+</script>

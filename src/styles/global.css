@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply font-sans text-slate-800 bg-slate-50;
+  }
+
+  ::selection {
+    @apply bg-accent/20 text-navy-900;
+  }
+}
+
+@layer components {
+  .section-padding {
+    @apply py-20 md:py-28 px-6;
+  }
+
+  .container-wide {
+    @apply max-w-7xl mx-auto;
+  }
+
+  .container-narrow {
+    @apply max-w-5xl mx-auto;
+  }
+
+  .heading-xl {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight;
+  }
+
+  .heading-lg {
+    @apply text-3xl md:text-4xl font-bold tracking-tight leading-tight;
+  }
+
+  .heading-md {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight;
+  }
+
+  .heading-sm {
+    @apply text-xl md:text-2xl font-semibold;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gradient-navy {
+    @apply bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800;
+  }
+
+  .gradient-accent {
+    @apply bg-gradient-to-r from-accent-dark to-accent;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200/60 shadow-sm
+           hover:shadow-lg hover:border-slate-300/60 transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-7 py-3.5 rounded-xl
+           bg-accent text-white font-semibold text-sm
+           hover:bg-accent-dark active:scale-[0.98]
+           transition-all duration-200 shadow-lg shadow-accent/25;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-7 py-3.5 rounded-xl
+           bg-white/10 text-white font-semibold text-sm border border-white/20
+           hover:bg-white/20 active:scale-[0.98]
+           transition-all duration-200 backdrop-blur-sm;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-2 px-7 py-3.5 rounded-xl
+           bg-transparent text-navy-900 font-semibold text-sm
+           border-2 border-navy-900/20
+           hover:border-navy-900 hover:bg-navy-900 hover:text-white
+           active:scale-[0.98] transition-all duration-200;
+  }
+}
+
+/* Scroll-triggered animation observer */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+.animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+.animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+.animate-on-scroll.delay-4 { transition-delay: 0.4s; }
+.animate-on-scroll.delay-5 { transition-delay: 0.5s; }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-on-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Fallback if JS fails to load */
+noscript ~ main .animate-on-scroll,
+.no-js .animate-on-scroll {
+  opacity: 1;
+  transform: none;
+}

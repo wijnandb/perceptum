@@ -1,0 +1,189 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Regenval" description="Vallende druppels met spateffect — digitale regen op je scherm.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Regenval</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">v = v&#x2080; + g&middot;t</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  let W = 0;
+  let H = 0;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  const DROP_COUNT = 200;
+  const GRAVITY = 0.15;
+  const SPLASH_FLOOR = 0.8;
+
+  interface Drop {
+    x: number;
+    y: number;
+    vy: number;
+    vx: number;
+    width: number;
+    height: number;
+    opacity: number;
+    golden: boolean;
+  }
+
+  interface Splash {
+    x: number;
+    y: number;
+    particles: {
+      vx: number;
+      vy: number;
+      x: number;
+      y: number;
+      life: number;
+    }[];
+    golden: boolean;
+    age: number;
+  }
+
+  const drops: Drop[] = [];
+  const splashes: Splash[] = [];
+
+  function createDrop(fromTop: boolean): Drop {
+    return {
+      x: Math.random() * (W || 800),
+      y: fromTop ? -Math.random() * 100 - 20 : Math.random() * (H || 600),
+      vy: 3 + Math.random() * 4,
+      vx: -0.5 + Math.random() * 0.3,
+      width: 1 + Math.random() * 2,
+      height: 8 + Math.random() * 12,
+      opacity: 0.2 + Math.random() * 0.4,
+      golden: Math.random() < 1 / 30,
+    };
+  }
+
+  for (let i = 0; i < DROP_COUNT; i++) {
+    drops.push(createDrop(false));
+  }
+
+  function createSplash(x: number, y: number, golden: boolean) {
+    const count = 3 + Math.floor(Math.random() * 2);
+    const particles = [];
+    for (let i = 0; i < count; i++) {
+      const angle = -Math.PI * (0.15 + Math.random() * 0.7);
+      const speed = 1.5 + Math.random() * 2;
+      particles.push({
+        vx: Math.cos(angle) * speed * (Math.random() > 0.5 ? 1 : -1),
+        vy: Math.sin(angle) * speed,
+        x: 0,
+        y: 0,
+        life: 1,
+      });
+    }
+    splashes.push({ x, y, particles, golden, age: 0 });
+  }
+
+  function update() {
+    const floorY = H * SPLASH_FLOOR;
+
+    for (let i = 0; i < drops.length; i++) {
+      const d = drops[i];
+      d.vy += GRAVITY;
+      d.x += d.vx;
+      d.y += d.vy;
+
+      if (d.y > floorY + Math.random() * (H - floorY)) {
+        createSplash(d.x, d.y, d.golden);
+        drops[i] = createDrop(true);
+      }
+
+      if (d.x < -10 || d.x > W + 10) {
+        drops[i] = createDrop(true);
+      }
+    }
+
+    for (let i = splashes.length - 1; i >= 0; i--) {
+      const s = splashes[i];
+      s.age++;
+      let allDead = true;
+      for (const p of s.particles) {
+        p.vy += 0.08;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.03;
+        if (p.life > 0) allDead = false;
+      }
+      if (allDead) {
+        splashes.splice(i, 1);
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Draw drops
+    for (const d of drops) {
+      if (d.golden) {
+        ctx.fillStyle = `rgba(251, 191, 36, ${d.opacity + 0.15})`;
+      } else {
+        ctx.fillStyle = `rgba(59, 130, 246, ${d.opacity})`;
+      }
+
+      ctx.save();
+      ctx.translate(d.x, d.y);
+      const angle = Math.atan2(d.vy, d.vx);
+      ctx.rotate(angle - Math.PI / 2);
+      ctx.fillRect(-d.width / 2, -d.height / 2, d.width, d.height);
+      ctx.restore();
+    }
+
+    // Draw splashes
+    for (const s of splashes) {
+      for (const p of s.particles) {
+        if (p.life <= 0) continue;
+        const alpha = p.life * 0.7;
+        if (s.golden) {
+          ctx.fillStyle = `rgba(251, 191, 36, ${alpha})`;
+        } else {
+          ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
+        }
+        const size = 1.5 * p.life;
+        ctx.beginPath();
+        ctx.arc(s.x + p.x, s.y + p.y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+</script>

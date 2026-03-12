@@ -1,0 +1,63 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const notes = [
+  {
+    title: 'Strategie: drie lagen, één doel',
+    date: '2026-03-12',
+    excerpt: 'Over de structuur van Perceptum, de producten die we bouwen, en waarom het belangrijker is om te bedenken WAT je bouwt dan HOE je het bouwt.',
+    slug: '2026-03-12-strategy-session',
+    readingTime: '5 min',
+  },
+];
+---
+
+<Layout
+  title="Notes"
+  description="Werknotities en strategisch denken — niet geïndexeerd, wel gedeeld."
+>
+  <meta slot="head" name="robots" content="noindex, nofollow" />
+
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="container-narrow mx-auto px-6 py-24 md:py-32 relative z-10">
+      <p class="text-accent font-medium text-sm tracking-wide uppercase mb-4">Notes</p>
+      <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.08] max-w-3xl">
+        Denken in<br />het openbaar.
+      </h1>
+      <p class="text-slate-400 mt-6 max-w-xl">
+        Werknotities, strategische gedachten, en ideeën in wording. Niet gepolijst, niet geïndexeerd — maar wel gedeeld. Liever ideeën de wereld in dan half-af op mijn computer.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="space-y-8">
+        {notes.map((note) => (
+          <a href={`/notes/${note.slug}/`} class="block group">
+            <article class="card p-8 animate-on-scroll">
+              <div class="flex items-center gap-3 text-xs text-slate-400 mb-3">
+                <time datetime={note.date}>{new Date(note.date).toLocaleDateString('nl-NL', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+                <span>&middot;</span>
+                <span>{note.readingTime}</span>
+              </div>
+              <h2 class="heading-sm text-navy-900 group-hover:text-accent transition-colors mb-3">{note.title}</h2>
+              <p class="text-slate-500 leading-relaxed">{note.excerpt}</p>
+              <span class="inline-flex items-center gap-1 text-sm font-medium text-accent mt-4">
+                Lees verder
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </span>
+            </article>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

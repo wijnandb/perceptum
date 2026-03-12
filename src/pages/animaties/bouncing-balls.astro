@@ -1,0 +1,172 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Bouncing Balls" description="Zwaartekracht en botsingen — ballen die stuiteren met kleursporen.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Bouncing Balls</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">F = m·g, elastische botsingen</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  interface Ball {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    r: number;
+    color: string;
+    trail: { x: number; y: number }[];
+  }
+
+  const GRAVITY = 0.3;
+  const DAMPING = 0.95;
+  const TRAIL_LENGTH = 20;
+  const BALL_COUNT = 18;
+
+  const balls: Ball[] = [];
+
+  function createBalls() {
+    balls.length = 0;
+    for (let i = 0; i < BALL_COUNT; i++) {
+      const r = 8 + Math.random() * 17;
+      const isAmber = i % 5 === 0;
+      const alpha = 0.5 + Math.random() * 0.3;
+      const color = isAmber
+        ? `rgba(251, 191, 36, ${alpha})`
+        : `rgba(59, 130, 246, ${alpha})`;
+      balls.push({
+        x: r + Math.random() * (canvas.width - 2 * r),
+        y: r + Math.random() * (canvas.height * 0.4),
+        vx: (Math.random() - 0.5) * 4,
+        vy: (Math.random() - 0.5) * 2,
+        r,
+        color,
+        trail: [],
+      });
+    }
+  }
+
+  createBalls();
+
+  function resolveCollisions() {
+    for (let i = 0; i < balls.length; i++) {
+      for (let j = i + 1; j < balls.length; j++) {
+        const a = balls[i];
+        const b = balls[j];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = a.r + b.r;
+        if (dist < minDist && dist > 0) {
+          const nx = dx / dist;
+          const ny = dy / dist;
+          const relVx = a.vx - b.vx;
+          const relVy = a.vy - b.vy;
+          const relVn = relVx * nx + relVy * ny;
+          if (relVn > 0) {
+            const massA = a.r * a.r;
+            const massB = b.r * b.r;
+            const impulse = (2 * relVn) / (massA + massB);
+            a.vx -= impulse * massB * nx * DAMPING;
+            a.vy -= impulse * massB * ny * DAMPING;
+            b.vx += impulse * massA * nx * DAMPING;
+            b.vy += impulse * massA * ny * DAMPING;
+          }
+          const overlap = (minDist - dist) / 2;
+          a.x -= overlap * nx;
+          a.y -= overlap * ny;
+          b.x += overlap * nx;
+          b.y += overlap * ny;
+        }
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (const ball of balls) {
+      ball.vy += GRAVITY;
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // Wall bounces
+      if (ball.x - ball.r < 0) {
+        ball.x = ball.r;
+        ball.vx = Math.abs(ball.vx) * DAMPING;
+      }
+      if (ball.x + ball.r > canvas.width) {
+        ball.x = canvas.width - ball.r;
+        ball.vx = -Math.abs(ball.vx) * DAMPING;
+      }
+      if (ball.y - ball.r < 0) {
+        ball.y = ball.r;
+        ball.vy = Math.abs(ball.vy) * DAMPING;
+      }
+      if (ball.y + ball.r > canvas.height) {
+        ball.y = canvas.height - ball.r;
+        ball.vy = -Math.abs(ball.vy) * DAMPING;
+      }
+
+      ball.trail.push({ x: ball.x, y: ball.y });
+      if (ball.trail.length > TRAIL_LENGTH) ball.trail.shift();
+    }
+
+    resolveCollisions();
+
+    // Draw trails
+    for (const ball of balls) {
+      for (let i = 0; i < ball.trail.length - 1; i++) {
+        const alpha = ((i + 1) / ball.trail.length) * 0.3;
+        const trailR = ball.r * ((i + 1) / ball.trail.length);
+        ctx.beginPath();
+        ctx.arc(ball.trail[i].x, ball.trail[i].y, trailR, 0, Math.PI * 2);
+        const baseColor = ball.color.includes('251') ? '251, 191, 36' : '59, 130, 246';
+        ctx.fillStyle = `rgba(${baseColor}, ${alpha})`;
+        ctx.fill();
+      }
+    }
+
+    // Draw balls
+    for (const ball of balls) {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = ball.color;
+      ctx.fill();
+      // Highlight
+      ctx.beginPath();
+      ctx.arc(ball.x - ball.r * 0.25, ball.y - ball.r * 0.25, ball.r * 0.35, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>

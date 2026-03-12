@@ -1,0 +1,245 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Turtle Graphics" description="Een schildpad volgt simpele regels en tekent fractale patronen.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Turtle Graphics</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">forward(n), turn(angle), repeat</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  interface Segment {
+    x1: number; y1: number;
+    x2: number; y2: number;
+  }
+
+  // Pre-compute all segments for a pattern using turtle commands
+  function computeSegments(commands: { type: 'forward' | 'turn'; value: number }[], startX: number, startY: number, startAngle: number): Segment[] {
+    const segs: Segment[] = [];
+    let x = startX, y = startY, angle = startAngle;
+    for (const cmd of commands) {
+      if (cmd.type === 'turn') {
+        angle += cmd.value;
+      } else {
+        const nx = x + cmd.value * Math.cos(angle);
+        const ny = y + cmd.value * Math.sin(angle);
+        segs.push({ x1: x, y1: y, x2: nx, y2: ny });
+        x = nx;
+        y = ny;
+      }
+    }
+    return segs;
+  }
+
+  // Fractal tree commands
+  function treeCommands(depth: number, length: number, angle: number): { type: 'forward' | 'turn'; value: number }[] {
+    if (depth === 0) return [{ type: 'forward', value: length }];
+    const cmds: { type: 'forward' | 'turn'; value: number }[] = [];
+    cmds.push({ type: 'forward', value: length });
+    cmds.push({ type: 'turn', value: -angle });
+    cmds.push(...treeCommands(depth - 1, length * 0.67, angle));
+    cmds.push({ type: 'turn', value: 2 * angle });
+    cmds.push(...treeCommands(depth - 1, length * 0.67, angle));
+    cmds.push({ type: 'turn', value: -angle });
+    // Return to branch start (backtrack)
+    cmds.push({ type: 'turn', value: Math.PI });
+    cmds.push({ type: 'forward', value: length });
+    cmds.push({ type: 'turn', value: Math.PI });
+    return cmds;
+  }
+
+  // Koch snowflake commands
+  function kochSide(depth: number, length: number): { type: 'forward' | 'turn'; value: number }[] {
+    if (depth === 0) return [{ type: 'forward', value: length }];
+    const l = length / 3;
+    return [
+      ...kochSide(depth - 1, l),
+      { type: 'turn', value: -Math.PI / 3 },
+      ...kochSide(depth - 1, l),
+      { type: 'turn', value: 2 * Math.PI / 3 },
+      ...kochSide(depth - 1, l),
+      { type: 'turn', value: -Math.PI / 3 },
+      ...kochSide(depth - 1, l),
+    ];
+  }
+
+  function snowflakeCommands(depth: number, sideLength: number): { type: 'forward' | 'turn'; value: number }[] {
+    const cmds: { type: 'forward' | 'turn'; value: number }[] = [];
+    for (let i = 0; i < 3; i++) {
+      cmds.push(...kochSide(depth, sideLength));
+      cmds.push({ type: 'turn', value: 2 * Math.PI / 3 });
+    }
+    return cmds;
+  }
+
+  // Dragon curve commands
+  function dragonCommands(depth: number, length: number): { type: 'forward' | 'turn'; value: number }[] {
+    if (depth === 0) return [{ type: 'forward', value: length }];
+    const sub = dragonCommands(depth - 1, length);
+    const reversed = [...sub].reverse().map(c => {
+      if (c.type === 'turn') return { type: 'turn' as const, value: -c.value };
+      return { ...c };
+    });
+    return [
+      ...sub,
+      { type: 'turn', value: -Math.PI / 2 },
+      ...reversed,
+    ];
+  }
+
+  interface Pattern {
+    name: string;
+    getSegments: () => Segment[];
+  }
+
+  function getScale(): number {
+    return Math.min(canvas.width, canvas.height) / 700;
+  }
+
+  const patternDefs: Pattern[] = [
+    {
+      name: 'Fractal Tree',
+      getSegments() {
+        const s = getScale();
+        const cmds = treeCommands(8, 60 * s, Math.PI / 7);
+        return computeSegments(cmds, canvas.width / 2, canvas.height * 0.78, -Math.PI / 2);
+      }
+    },
+    {
+      name: 'Koch Snowflake',
+      getSegments() {
+        const s = getScale();
+        const side = 280 * s;
+        const cmds = snowflakeCommands(4, side);
+        const startX = canvas.width / 2 - side / 2;
+        const startY = canvas.height / 2 - side * 0.15;
+        return computeSegments(cmds, startX, startY, 0);
+      }
+    },
+    {
+      name: 'Dragon Curve',
+      getSegments() {
+        const s = getScale();
+        const cmds = dragonCommands(12, 4 * s);
+        return computeSegments(cmds, canvas.width / 2 - 50 * s, canvas.height / 2 + 50 * s, 0);
+      }
+    },
+  ];
+
+  let currentPattern = 0;
+  let segments: Segment[] = [];
+  let drawIndex = 0;
+  let fadeAlpha = 1;
+  let phase: 'drawing' | 'pausing' | 'fading' = 'drawing';
+  let pauseFrames = 0;
+
+  function initPattern() {
+    segments = patternDefs[currentPattern].getSegments();
+    drawIndex = 0;
+    fadeAlpha = 1;
+    phase = 'drawing';
+  }
+
+  initPattern();
+
+  function drawTurtle(x: number, y: number, angle: number) {
+    const size = 6;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(size, 0);
+    ctx.lineTo(-size * 0.6, -size * 0.5);
+    ctx.lineTo(-size * 0.6, size * 0.5);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.9)';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (phase === 'drawing') {
+      // Advance drawing by a few segments per frame
+      const segsPerFrame = Math.max(2, Math.floor(segments.length / 400));
+      drawIndex = Math.min(drawIndex + segsPerFrame, segments.length);
+
+      if (drawIndex >= segments.length) {
+        phase = 'pausing';
+        pauseFrames = 120;
+      }
+    }
+
+    if (phase === 'pausing') {
+      pauseFrames--;
+      if (pauseFrames <= 0) {
+        phase = 'fading';
+      }
+    }
+
+    if (phase === 'fading') {
+      fadeAlpha -= 0.015;
+      if (fadeAlpha <= 0) {
+        currentPattern = (currentPattern + 1) % patternDefs.length;
+        initPattern();
+        return requestAnimationFrame(draw);
+      }
+    }
+
+    // Draw all revealed segments
+    const alpha = fadeAlpha;
+    for (let i = 0; i < drawIndex && i < segments.length; i++) {
+      const seg = segments[i];
+      const segAlpha = Math.min((i / Math.max(drawIndex, 1)) * 0.8 + 0.2, 1) * alpha;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.strokeStyle = `rgba(59, 130, 246, ${segAlpha * 0.7})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // Draw turtle at current position
+    if (phase === 'drawing' && drawIndex > 0 && drawIndex < segments.length) {
+      const seg = segments[drawIndex - 1];
+      const angle = Math.atan2(seg.y2 - seg.y1, seg.x2 - seg.x1);
+      drawTurtle(seg.x2, seg.y2, angle);
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+
+  // Re-init on resize to recalculate positions
+  window.addEventListener('resize', () => {
+    resize();
+    initPattern();
+  });
+</script>

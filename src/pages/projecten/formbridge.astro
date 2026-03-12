@@ -1,0 +1,123 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CTA from '../../components/CTA.astro';
+---
+
+<Layout
+  title="FormBridge"
+  description="FormBridge — betrouwbare formulieren-backend voor statische websites. Geen vendor lock-in, privacy-first, ingebouwde spamfiltering."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <h1 class="heading-xl text-white mb-6">FormBridge</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Formulieren voor statische websites. Betrouwbaar, snel en zonder afhankelijkheden.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <h2 class="heading-lg text-navy-900 mb-12 text-center animate-on-scroll">Hoe het werkt</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          { step: '1', title: 'Formulier bouwen', desc: 'Maak een HTML-formulier op uw website. Geen speciale libraries nodig.' },
+          { step: '2', title: 'API koppelen', desc: 'Verwijs het formulier naar uw unieke FormBridge-endpoint.' },
+          { step: '3', title: 'Data ontvangen', desc: 'Ontvang inzendingen via e-mail of haal ze op via de API.' },
+        ].map((item, i) => (
+          <div class={`text-center animate-on-scroll delay-${i + 1}`}>
+            <div class="w-12 h-12 rounded-full gradient-navy text-white font-bold text-lg flex items-center justify-center mx-auto mb-4">
+              {item.step}
+            </div>
+            <h3 class="font-bold text-navy-900 mb-2">{item.title}</h3>
+            <p class="text-sm text-slate-500">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="section-padding bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <h2 class="heading-lg text-navy-900 mb-12 text-center animate-on-scroll">Waarom FormBridge</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[
+          { title: 'Geen vendor lock-in', desc: 'Uw data blijft van u. Exporteer wanneer u wilt, stap over wanneer u wilt.' },
+          { title: 'Privacy-first', desc: 'Wij verwerken geen persoonlijke data voor eigen doeleinden. Uw formulierdata is van u.' },
+          { title: 'Spamfiltering', desc: 'Ingebouwde bescherming tegen spam. Zonder irritante captchas of honeypots.' },
+          { title: 'Simpele API', desc: 'Een REST API die elke developer begrijpt. Integreer in minuten, niet in uren.' },
+        ].map((item, i) => (
+          <div class={`card p-6 animate-on-scroll delay-${i + 1}`}>
+            <h3 class="font-bold text-navy-900 mb-2">{item.title}</h3>
+            <p class="text-slate-500 text-sm">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Signup form -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto max-w-xl text-center animate-on-scroll">
+      <h2 class="heading-md text-navy-900 mb-4">Interesse?</h2>
+      <p class="text-slate-500 mb-8">
+        Laat uw gegevens achter en wij informeren u zodra FormBridge beschikbaar is als zelfstandig product.
+      </p>
+      <form id="formbridge-signup" class="space-y-4 text-left">
+        <div>
+          <label for="signup-naam" class="block text-sm font-medium text-slate-700 mb-1">Naam</label>
+          <input type="text" id="signup-naam" name="naam" required
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all outline-none" />
+        </div>
+        <div>
+          <label for="signup-email" class="block text-sm font-medium text-slate-700 mb-1">E-mailadres</label>
+          <input type="email" id="signup-email" name="email" required
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all outline-none" />
+        </div>
+        <div>
+          <label for="signup-usecase" class="block text-sm font-medium text-slate-700 mb-1">Waarvoor wilt u het gebruiken?</label>
+          <textarea id="signup-usecase" name="usecase" rows="3"
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all outline-none resize-none"></textarea>
+        </div>
+        <input type="hidden" name="_gotcha" value="" />
+        <button type="submit" class="btn-primary w-full justify-center">Houd mij op de hoogte</button>
+        <div id="signup-success" class="hidden text-center p-4 rounded-xl bg-emerald-50 text-emerald-700 font-medium">
+          Bedankt! Wij houden u op de hoogte.
+        </div>
+        <div id="signup-error" class="hidden text-center p-4 rounded-xl bg-red-50 text-red-700 font-medium">
+          Er ging iets mis. Probeer het later opnieuw.
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <CTA />
+</Layout>
+
+<script>
+  const form = document.getElementById('formbridge-signup') as HTMLFormElement;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+    data._ts = String(Date.now());
+    try {
+      await fetch('https://forms.bollenstreekdigitaal.nl/api/v1/s/f_6f7cf77bd01d', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      form.style.display = 'none';
+      document.getElementById('signup-success')!.classList.remove('hidden');
+    } catch {
+      document.getElementById('signup-error')!.classList.remove('hidden');
+    }
+  });
+</script>

@@ -1,0 +1,198 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Sierpinski Driehoek" description="Het chaos-spel — willekeurige punten die orde scheppen uit niets.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Sierpinski Driehoek</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">Verdeel, verwijder het midden, herhaal — stap voor stap ontstaat een fractal</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  const FILL_COLOR = 'rgba(59, 130, 246, 0.7)';
+  const CUTOUT_COLOR = 'rgba(15, 23, 42, 1)';   // matches gradient-navy bg
+  const EDGE_COLOR = 'rgba(251, 191, 36, 0.5)';
+  const MAX_DEPTH = 7;
+  const LEVEL_DELAY = 900;    // ms pause between levels
+  const HOLD_DELAY = 2500;    // ms to admire the final result
+  const FADE_SPEED = 0.02;
+
+  type Tri = [[number, number], [number, number], [number, number]];
+
+  let vertices: Tri = [[0,0],[0,0],[0,0]];
+  let currentDepth = 0;
+  let phase: 'building' | 'holding' | 'fading' | 'waiting' = 'waiting';
+  let fadeAlpha = 1;
+  let lastLevelTime = 0;
+  let holdStart = 0;
+
+  // Collect all cutout triangles per level for animation
+  let cutoutsByLevel: Tri[][] = [];
+
+  function midpoint(a: [number, number], b: [number, number]): [number, number] {
+    return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  }
+
+  function computeCutouts(tri: Tri, depth: number, maxDepth: number) {
+    if (depth >= maxDepth) return;
+    const [a, b, c] = tri;
+    const ab = midpoint(a, b);
+    const bc = midpoint(b, c);
+    const ac = midpoint(a, c);
+
+    // The middle triangle is the cutout at this depth
+    if (!cutoutsByLevel[depth]) cutoutsByLevel[depth] = [];
+    cutoutsByLevel[depth].push([ab, bc, ac]);
+
+    // Recurse into the three remaining triangles
+    computeCutouts([a, ab, ac], depth + 1, maxDepth);
+    computeCutouts([ab, b, bc], depth + 1, maxDepth);
+    computeCutouts([ac, bc, c], depth + 1, maxDepth);
+  }
+
+  function computeVertices() {
+    const w = canvas.width;
+    const h = canvas.height;
+    const padding = 60;
+    const triH = h - padding * 2;
+    const triW = Math.min(w - padding * 2, triH * 1.15);
+    const cx = w / 2;
+    const bottom = h - padding;
+    const top = bottom - (triW * Math.sqrt(3) / 2);
+
+    vertices = [
+      [cx, Math.max(padding, top)],
+      [cx - triW / 2, bottom],
+      [cx + triW / 2, bottom],
+    ];
+  }
+
+  function precompute() {
+    cutoutsByLevel = [];
+    computeCutouts(vertices, 0, MAX_DEPTH);
+  }
+
+  function drawTriangle(tri: Tri, color: string, alpha = 1) {
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.moveTo(tri[0][0], tri[0][1]);
+    ctx.lineTo(tri[1][0], tri[1][1]);
+    ctx.lineTo(tri[2][0], tri[2][1]);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  function drawEdges(tri: Tri, alpha = 1) {
+    ctx.globalAlpha = alpha * 0.4;
+    ctx.beginPath();
+    ctx.moveTo(tri[0][0], tri[0][1]);
+    ctx.lineTo(tri[1][0], tri[1][1]);
+    ctx.lineTo(tri[2][0], tri[2][1]);
+    ctx.closePath();
+    ctx.strokeStyle = EDGE_COLOR;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  function init() {
+    computeVertices();
+    precompute();
+    currentDepth = 0;
+    phase = 'building';
+    fadeAlpha = 1;
+    lastLevelTime = performance.now();
+  }
+
+  function drawScene(levelAlpha: number) {
+    // Draw the big filled triangle
+    drawTriangle(vertices, FILL_COLOR, fadeAlpha);
+
+    // Draw edges of the outer triangle
+    drawEdges(vertices, fadeAlpha);
+
+    // Cut out triangles up to currentDepth
+    for (let d = 0; d < currentDepth; d++) {
+      for (const tri of cutoutsByLevel[d]) {
+        drawTriangle(tri, CUTOUT_COLOR, fadeAlpha);
+        drawEdges(tri, fadeAlpha * 0.6);
+      }
+    }
+
+    // Animate the current level fading in
+    if (currentDepth < MAX_DEPTH && cutoutsByLevel[currentDepth] && levelAlpha > 0) {
+      for (const tri of cutoutsByLevel[currentDepth]) {
+        drawTriangle(tri, CUTOUT_COLOR, fadeAlpha * levelAlpha);
+        drawEdges(tri, fadeAlpha * levelAlpha * 0.6);
+      }
+    }
+  }
+
+  function animate(time: number) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (phase === 'building') {
+      const elapsed = time - lastLevelTime;
+      // Fade in current level over 300ms
+      const levelAlpha = Math.min(1, elapsed / 300);
+
+      drawScene(levelAlpha);
+
+      if (elapsed >= LEVEL_DELAY) {
+        currentDepth++;
+        lastLevelTime = time;
+        if (currentDepth >= MAX_DEPTH) {
+          phase = 'holding';
+          holdStart = time;
+        }
+      }
+    } else if (phase === 'holding') {
+      drawScene(0);
+      if (time - holdStart >= HOLD_DELAY) {
+        phase = 'fading';
+      }
+    } else if (phase === 'fading') {
+      fadeAlpha -= FADE_SPEED;
+      if (fadeAlpha <= 0) {
+        fadeAlpha = 0;
+        phase = 'waiting';
+        setTimeout(() => {
+          init();
+          requestAnimationFrame(animate);
+        }, 500);
+        return;
+      }
+      drawScene(0);
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  function resize() {
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    init();
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(animate);
+</script>

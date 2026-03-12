@@ -1,0 +1,103 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Lorenz Attractor" description="De beroemde vlindervormige chaotische baan die nooit herhaalt.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Lorenz Attractor</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">dx/dt = σ(y−x), dy/dt = x(ρ−z)−y, dz/dt = xy−βz</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Lorenz parameters
+  const sigma = 10;
+  const rho = 28;
+  const beta = 8 / 3;
+  const dt = 0.005;
+  const maxTrail = 2000;
+  const stepsPerFrame = 6;
+
+  // State
+  let x = 0.1;
+  let y = 0;
+  let z = 0;
+  const trail: { x: number; y: number; z: number }[] = [];
+
+  function step() {
+    const dx = sigma * (y - x);
+    const dy = x * (rho - z) - y;
+    const dz = x * y - beta * z;
+    x += dx * dt;
+    y += dy * dt;
+    z += dz * dt;
+    trail.push({ x, y, z });
+    if (trail.length > maxTrail) trail.shift();
+  }
+
+  // Project 3D -> 2D with a slight rotation around the Y axis
+  function project(p: { x: number; y: number; z: number }): [number, number] {
+    const angle = 0.3;
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+    const px = p.x * cosA + p.z * sinA;
+    const py = p.y;
+    return [px, py];
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < stepsPerFrame; i++) step();
+
+    if (trail.length < 2) {
+      requestAnimationFrame(draw);
+      return;
+    }
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const centerX = w / 2;
+    const centerY = h * 0.5;
+    const scale = Math.min(w, h) / 55;
+
+    for (let i = 1; i < trail.length; i++) {
+      const alpha = (i / trail.length) * 0.9 + 0.1;
+      const [x0, y0] = project(trail[i - 1]);
+      const [x1, y1] = project(trail[i]);
+
+      ctx.beginPath();
+      ctx.moveTo(centerX + x0 * scale, centerY - y0 * scale);
+      ctx.lineTo(centerX + x1 * scale, centerY - y1 * scale);
+      ctx.strokeStyle = `rgba(59,130,246,${alpha})`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  requestAnimationFrame(draw);
+</script>

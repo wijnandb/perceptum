@@ -1,0 +1,176 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Gravity Slingshot" description="Zwaartekrachtvelden — deeltjes die afbuigen rond massa's.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Gravity Slingshot</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">F = G·m₁·m₂/r²</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  interface Planet { x: number; y: number; mass: number; r: number; }
+  interface Particle {
+    x: number; y: number; vx: number; vy: number;
+    trail: { x: number; y: number }[];
+    life: number; maxLife: number;
+  }
+
+  const G = 80;
+  const MIN_DIST = 50;
+  const TRAIL_LEN = 50;
+  const MAX_PARTICLES = 150;
+  const MAX_ACCEL = 0.4;
+
+  let planets: Planet[] = [];
+  let particles: Particle[] = [];
+
+  function initPlanets() {
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const spread = Math.min(canvas.width, canvas.height) * 0.25;
+    planets = [
+      { x: cx - spread * 0.7, y: cy - spread * 0.2, mass: 4000, r: 24 },
+      { x: cx + spread * 0.5, y: cy + spread * 0.5, mass: 3000, r: 18 },
+      { x: cx + spread * 0.2, y: cy - spread * 0.6, mass: 3500, r: 20 },
+      { x: cx - spread * 0.4, y: cy + spread * 0.7, mass: 2500, r: 16 },
+    ];
+    particles = [];
+  }
+
+  function resize() {
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    initPlanets();
+  }
+
+  function emitParticle() {
+    if (particles.length >= MAX_PARTICLES) return;
+    const edge = Math.floor(Math.random() * 4);
+    const speed = 2 + Math.random() * 2.5;
+    let x: number, y: number, vx: number, vy: number;
+
+    if (edge === 0) { // top
+      x = Math.random() * canvas.width; y = -5;
+      vx = (Math.random() - 0.5) * 2; vy = speed;
+    } else if (edge === 1) { // right
+      x = canvas.width + 5; y = Math.random() * canvas.height;
+      vx = -speed; vy = (Math.random() - 0.5) * 2;
+    } else if (edge === 2) { // bottom
+      x = Math.random() * canvas.width; y = canvas.height + 5;
+      vx = (Math.random() - 0.5) * 2; vy = -speed;
+    } else { // left
+      x = -5; y = Math.random() * canvas.height;
+      vx = speed; vy = (Math.random() - 0.5) * 2;
+    }
+
+    particles.push({ x, y, vx, vy, trail: [], life: 0, maxLife: 400 + Math.random() * 200 });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Emit
+    if (Math.random() < 0.3) emitParticle();
+    if (Math.random() < 0.3) emitParticle();
+
+    // Update physics
+    for (const p of particles) {
+      for (const pl of planets) {
+        const dx = pl.x - p.x;
+        const dy = pl.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 1) continue;
+        const clampDist = Math.max(dist, MIN_DIST);
+        const force = (G * pl.mass) / (clampDist * clampDist);
+        let ax = (force * dx) / dist;
+        let ay = (force * dy) / dist;
+        const mag = Math.sqrt(ax * ax + ay * ay);
+        if (mag > MAX_ACCEL) { ax = (ax / mag) * MAX_ACCEL; ay = (ay / mag) * MAX_ACCEL; }
+        p.vx += ax;
+        p.vy += ay;
+      }
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life++;
+      p.trail.push({ x: p.x, y: p.y });
+      if (p.trail.length > TRAIL_LEN) p.trail.shift();
+    }
+
+    // Remove dead
+    const m = 150;
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      if (p.life > p.maxLife || p.x < -m || p.x > canvas.width + m || p.y < -m || p.y > canvas.height + m) {
+        particles.splice(i, 1);
+      }
+    }
+
+    // Draw trails
+    for (const p of particles) {
+      if (p.trail.length < 2) continue;
+      for (let i = 0; i < p.trail.length - 1; i++) {
+        const alpha = ((i + 1) / p.trail.length) * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(p.trail[i].x, p.trail[i].y);
+        ctx.lineTo(p.trail[i + 1].x, p.trail[i + 1].y);
+        ctx.strokeStyle = `rgba(59, 130, 246, ${alpha})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      // Head dot
+      const h = p.trail[p.trail.length - 1];
+      ctx.beginPath();
+      ctx.arc(h.x, h.y, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.9)';
+      ctx.fill();
+    }
+
+    // Draw planets
+    for (const pl of planets) {
+      // Glow
+      const grad = ctx.createRadialGradient(pl.x, pl.y, pl.r * 0.5, pl.x, pl.y, pl.r * 4);
+      grad.addColorStop(0, 'rgba(251, 191, 36, 0.25)');
+      grad.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.beginPath();
+      ctx.arc(pl.x, pl.y, pl.r * 4, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Body
+      ctx.beginPath();
+      ctx.arc(pl.x, pl.y, pl.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.8)';
+      ctx.fill();
+
+      // Highlight
+      ctx.beginPath();
+      ctx.arc(pl.x - pl.r * 0.2, pl.y - pl.r * 0.2, pl.r * 0.35, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fill();
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  // Start after DOM is ready
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(animate);
+</script>

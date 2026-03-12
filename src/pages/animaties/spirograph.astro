@@ -1,0 +1,161 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Spirograph" description="Roulettecurven — cirkels die binnen cirkels rollen en prachtige patronen tekenen.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Spirograph</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">x = (R-r)&middot;cos(t) + d&middot;cos((R-r)t/r)</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  const patterns = [
+    { R: 200, r: 80, d: 60 },
+    { R: 200, r: 130, d: 75 },
+    { R: 200, r: 55, d: 50 },
+    { R: 200, r: 105, d: 90 },
+    { R: 200, r: 70, d: 45 },
+    { R: 200, r: 95, d: 80 },
+  ];
+
+  let patternIndex = 0;
+  let t = 0;
+  let fadeAlpha = 1;
+  let phase: 'drawing' | 'fading' | 'waiting' = 'drawing';
+  let waitFrames = 0;
+  let points: { x: number; y: number }[] = [];
+
+  function gcd(a: number, b: number): number {
+    a = Math.abs(Math.round(a));
+    b = Math.abs(Math.round(b));
+    while (b) { [a, b] = [b, a % b]; }
+    return a;
+  }
+
+  function getMaxT(R: number, r: number): number {
+    const g = gcd(R, r);
+    return (r / g) * 2 * Math.PI;
+  }
+
+  function getScale(): number {
+    const size = Math.min(canvas.width, canvas.height);
+    return size / 600;
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const p = patterns[patternIndex];
+    const scale = getScale();
+    const R = p.R * scale;
+    const r = p.r * scale;
+    const d = p.d * scale;
+    const maxT = getMaxT(p.R, p.r);
+
+    if (phase === 'drawing') {
+      const step = 0.04;
+      for (let i = 0; i < 2; i++) {
+        if (t <= maxT + 0.1) {
+          const x = cx + (R - r) * Math.cos(t) + d * Math.cos(((R - r) / r) * t);
+          const y = cy + (R - r) * Math.sin(t) - d * Math.sin(((R - r) / r) * t);
+          points.push({ x, y });
+          t += step;
+        }
+      }
+
+      if (t > maxT + 0.1) {
+        phase = 'fading';
+        fadeAlpha = 1;
+      }
+
+      // Draw subtle mechanism circles
+      const innerCx = cx + (R - r) * Math.cos(t);
+      const innerCy = cy + (R - r) * Math.sin(t);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(innerCx, innerCy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    if (phase === 'fading') {
+      fadeAlpha -= 0.008;
+      if (fadeAlpha <= 0) {
+        fadeAlpha = 0;
+        phase = 'waiting';
+        waitFrames = 30;
+      }
+    }
+
+    if (phase === 'waiting') {
+      waitFrames--;
+      if (waitFrames <= 0) {
+        patternIndex = (patternIndex + 1) % patterns.length;
+        t = 0;
+        points = [];
+        fadeAlpha = 1;
+        phase = 'drawing';
+      }
+    }
+
+    // Draw accumulated points
+    if (points.length > 1) {
+      const alpha = phase === 'fading' ? fadeAlpha : 1;
+      for (let i = 1; i < points.length; i++) {
+        const segAlpha = (i / points.length) * 0.8 * alpha;
+        ctx.beginPath();
+        ctx.moveTo(points[i - 1].x, points[i - 1].y);
+        ctx.lineTo(points[i].x, points[i].y);
+        ctx.strokeStyle = `rgba(59, 130, 246, ${segAlpha})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Draw pen point
+      if (phase === 'drawing' && points.length > 0) {
+        const last = points[points.length - 1];
+        ctx.beginPath();
+        ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.9)';
+        ctx.fill();
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>

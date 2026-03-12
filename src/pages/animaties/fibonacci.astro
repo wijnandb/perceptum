@@ -1,0 +1,210 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Fibonacci Spiral" description="De gulden rechthoek — Fibonacci's spiraal opgebouwd uit perfecte verhoudingen.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Fibonacci Spiral</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">1, 1, 2, 3, 5, 8, 13, 21, 34, 55… — de gulden rechthoek en haar spiraal.</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  // Fibonacci numbers
+  const fibs = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
+
+  // Precompute squares: each square is placed by subdividing the golden rectangle
+  // We track: x, y, size, and which corner the arc pivots from
+  interface Square {
+    x: number; y: number; size: number; fibNum: number;
+    arcCx: number; arcCy: number;
+    startAngle: number; endAngle: number;
+  }
+
+  let squares: Square[] = [];
+  let revealedCount = 0;
+  let lastRevealTime = 0;
+  let fadeAlpha = 0;
+  let fading = false;
+  let pausing = false;
+  let pauseStart = 0;
+  const REVEAL_MS = 700;
+  const PAUSE_MS = 3000;
+
+  function computeSquares() {
+    squares = [];
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Build from smallest to largest, tracking position
+    // The trick: place squares in a spiral pattern
+    // Direction cycle: right, up, left, down (counter-clockwise build)
+    let cx = 0, cy = 0; // current origin
+
+    for (let i = 0; i < fibs.length; i++) {
+      const s = fibs[i];
+      const prev = i > 0 ? fibs[i - 1] : 0;
+      const dir = i % 4;
+      let sx: number, sy: number;
+
+      if (i === 0) {
+        sx = 0; sy = 0;
+      } else if (dir === 0) {
+        // place to the right of previous
+        sx = cx + prev; sy = cy + prev - s;
+      } else if (dir === 1) {
+        // place above previous
+        sx = cx; sy = cy - s;
+      } else if (dir === 2) {
+        // place to the left of previous
+        sx = cx - s; sy = cy;
+      } else {
+        // place below previous
+        sx = cx + prev - s; sy = cy + prev;
+      }
+
+      cx = sx; cy = sy;
+
+      // Arc corner depends on direction
+      let arcCx: number, arcCy: number, startAngle: number, endAngle: number;
+      if (dir === 0) {
+        arcCx = sx; arcCy = sy + s;
+        startAngle = -Math.PI / 2; endAngle = 0;
+      } else if (dir === 1) {
+        arcCx = sx + s; arcCy = sy + s;
+        startAngle = Math.PI; endAngle = 1.5 * Math.PI;
+      } else if (dir === 2) {
+        arcCx = sx + s; arcCy = sy;
+        startAngle = Math.PI / 2; endAngle = Math.PI;
+      } else {
+        arcCx = sx; arcCy = sy;
+        startAngle = 0; endAngle = Math.PI / 2;
+      }
+
+      squares.push({ x: sx, y: sy, size: s, fibNum: fibs[i], arcCx, arcCy, startAngle, endAngle });
+    }
+
+    // Now scale and center all squares to fit the canvas
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const sq of squares) {
+      minX = Math.min(minX, sq.x);
+      minY = Math.min(minY, sq.y);
+      maxX = Math.max(maxX, sq.x + sq.size);
+      maxY = Math.max(maxY, sq.y + sq.size);
+    }
+
+    const totalW = maxX - minX;
+    const totalH = maxY - minY;
+    const scale = Math.min(w * 0.75 / totalW, h * 0.75 / totalH);
+    const offsetX = (w - totalW * scale) / 2 - minX * scale;
+    const offsetY = (h - totalH * scale) / 2 - minY * scale;
+
+    for (const sq of squares) {
+      sq.x = sq.x * scale + offsetX;
+      sq.y = sq.y * scale + offsetY;
+      sq.size *= scale;
+      sq.arcCx = sq.arcCx * scale + offsetX;
+      sq.arcCy = sq.arcCy * scale + offsetY;
+    }
+  }
+
+  function resize() {
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    computeSquares();
+    revealedCount = 0;
+    lastRevealTime = performance.now();
+    fadeAlpha = 0;
+    fading = false;
+    pausing = false;
+  }
+
+  function drawSquare(sq: Square, alpha: number) {
+    // Rectangle outline
+    ctx.strokeStyle = `rgba(59, 130, 246, ${0.35 * alpha})`;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(sq.x, sq.y, sq.size, sq.size);
+
+    // Subtle fill
+    ctx.fillStyle = `rgba(59, 130, 246, ${0.03 * alpha})`;
+    ctx.fillRect(sq.x, sq.y, sq.size, sq.size);
+
+    // Quarter-circle arc (the golden spiral)
+    ctx.beginPath();
+    ctx.arc(sq.arcCx, sq.arcCy, sq.size, sq.startAngle, sq.endAngle);
+    ctx.strokeStyle = `rgba(251, 191, 36, ${0.8 * alpha})`;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Fibonacci number
+    if (sq.size > 25) {
+      const fontSize = Math.max(11, Math.min(sq.size * 0.25, 40));
+      ctx.font = `300 ${fontSize}px system-ui, -apple-system, sans-serif`;
+      ctx.fillStyle = `rgba(148, 163, 184, ${0.5 * alpha})`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(sq.fibNum), sq.x + sq.size / 2, sq.y + sq.size / 2);
+    }
+  }
+
+  function animate(time: number) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // State machine
+    if (fading) {
+      fadeAlpha += 0.02;
+      if (fadeAlpha >= 1) {
+        revealedCount = 0;
+        lastRevealTime = time;
+        fadeAlpha = 0;
+        fading = false;
+        pausing = false;
+      }
+    } else if (pausing) {
+      if (time - pauseStart >= PAUSE_MS) {
+        fading = true;
+      }
+    } else if (revealedCount < squares.length) {
+      if (time - lastRevealTime >= REVEAL_MS) {
+        revealedCount++;
+        lastRevealTime = time;
+      }
+    } else if (!pausing) {
+      pausing = true;
+      pauseStart = time;
+    }
+
+    const globalAlpha = fading ? Math.max(0, 1 - fadeAlpha) : 1;
+
+    for (let i = 0; i < revealedCount && i < squares.length; i++) {
+      let alpha = globalAlpha;
+      // Animate newest square fading in
+      if (i === revealedCount - 1 && !fading && !pausing) {
+        const elapsed = time - lastRevealTime;
+        alpha = Math.min(1, elapsed / 350) * globalAlpha;
+      }
+      drawSquare(squares[i], alpha);
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(animate);
+</script>

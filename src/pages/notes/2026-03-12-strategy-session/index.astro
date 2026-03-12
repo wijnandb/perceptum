@@ -1,0 +1,116 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Strategie: drie lagen, één doel"
+  description="Over de structuur van Perceptum, de producten die we bouwen, en de shipping funnel."
+>
+  <meta slot="head" name="robots" content="noindex, nofollow" />
+
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="container-narrow mx-auto px-6 py-24 md:py-32 relative z-10">
+      <a href="/notes/" class="text-accent font-medium text-sm tracking-wide uppercase mb-4 inline-flex items-center gap-1 hover:underline">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+        </svg>
+        Notes
+      </a>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.08] max-w-3xl mt-4">
+        Strategie: drie lagen, één doel
+      </h1>
+      <div class="flex items-center gap-3 text-sm text-slate-400 mt-6">
+        <time datetime="2026-03-12">12 maart 2026</time>
+        <span>&middot;</span>
+        <span>5 min</span>
+      </div>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <article class="prose prose-slate prose-lg max-w-none">
+
+        <blockquote>
+          <p>"I'd rather spread ideas that get picked up and stolen, than keep everything half-finished on my computer."</p>
+        </blockquote>
+
+        <h2>De drie lagen</h2>
+
+        <p>Perceptum opereert op drie niveaus. Elk heeft zijn eigen snelheid, zijn eigen doel, en zijn eigen definitie van succes.</p>
+
+        <h3>Laag 1: Diensten (omzet nu)</h3>
+        <p><strong>Perceptum</strong> levert digitale diensten voor klanten. Websites, automatisering, strategie. Dit is de motor die draait.</p>
+        <p><strong>Bollenstreek Digitaal</strong> is het bewijs dat het systeem werkt: mijn zoon bouwt met dezelfde tools prachtige, converterende websites. Hij heeft zijn eerste klanten. Dat verhaal — vader bouwt AI-toolkit, zoon runt er een bureau mee — verdient verteld te worden.</p>
+
+        <h3>Laag 2: Producten (gebouwd, niet gevalideerd)</h3>
+        <p>We hebben vijf tools gebouwd die werken, maar nog niet zijn gevalideerd met genoeg echte gebruikers:</p>
+        <ul>
+          <li><strong>Chatbot</strong> — AI-gestuurde klantenservice. Eerste tester is bezig met feedback.</li>
+          <li><strong>Formbridge</strong> — Formulieren die doorlinken naar elk systeem. Volgende klant staat klaar.</li>
+          <li><strong>Analytics</strong> — Website-analyse met AI-interpretatie. Inzichten worden automatisch vertaald naar verbetervoorstellen.</li>
+          <li><strong>CRM</strong> — Klantrelatiebeheer, specifiek voor kleine bureaus.</li>
+          <li><strong>WebScan</strong> — Website-checker die direct verbeterpunten toont.</li>
+        </ul>
+        <p>Elk product staat op het punt van "het werkt op mijn computer" naar "het staat in de wereld." Dat is precies het gat dat we moeten dichten.</p>
+
+        <h3>Laag 3: Het meta-niveau</h3>
+        <p>Als software bouwen makkelijk en goedkoop wordt — door AI, door betere tools, door meer ervaring — dan wordt de vraag <em>wat</em> je bouwt veel belangrijker dan <em>hoe</em> je het bouwt.</p>
+        <p>Dat inzicht is zelf een product. Een methodologie voor <strong>ideevalidatie</strong>: voordat je bouwt, bewijs dat het de moeite waard is. We gebruiken het intern. Maar het kan ook extern: andere bouwers helpen om betere keuzes te maken over wat ze bouwen.</p>
+
+        <h2>De shipping funnel</h2>
+
+        <p>Het probleem is niet creativiteit. Het probleem is de laatste 10% — het publiek maken. De oplossing is een trechter waarbij elk stadium een publiek artefact oplevert:</p>
+
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Stadium</th>
+                <th>Wat gebeurt er</th>
+                <th>Publiek resultaat</th>
+                <th>Tijdslimiet</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>0. Vonk</td><td>Idee hebben</td><td>Post of notitie</td><td>Dezelfde dag</td></tr>
+              <tr><td>1. Vorm</td><td>1-pagina probleemstelling</td><td>Landingspagina</td><td>1 week</td></tr>
+              <tr><td>2. Stub</td><td>MVP die bewijst dat het werkt</td><td>Live URL</td><td>2 weken</td></tr>
+              <tr><td>3. Valideer</td><td>10 echte mensen testen het</td><td>Feedback + go/no-go</td><td>4 weken</td></tr>
+              <tr><td>4. Schaal</td><td>Verdubbelen of stoppen</td><td>Prijspagina of sunset</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>De kernregel:</strong> niets onder stadium 2 mag alleen op mijn computer bestaan. Als het niet binnen twee weken publiek is, wordt het lelijk verscheept of gearchiveerd. Niet gedood — gearchiveerd. Groot verschil.</p>
+
+        <h2>Het analytics-vliegwiel</h2>
+
+        <p>Van alle producten is Analytics het meest interessant, omdat het niet alleen een product is — het is de motor die alles voedt:</p>
+
+        <ol>
+          <li>Analytics op klantsites genereert data</li>
+          <li>AI interpreteert de data → verbetervoorstellen (dienst-waarde)</li>
+          <li>Dezelfde inzichten worden content (aandacht)</li>
+          <li>Content trekt nieuwe klanten aan</li>
+          <li>Nieuwe klanten krijgen analytics</li>
+          <li>Meer data, betere inzichten — herhaal</li>
+        </ol>
+
+        <p>Twee waardepropositites in één: een <strong>diensttool</strong> (klanten krijgen automatische verbetervoorstellen) en een <strong>content-engine</strong> (echte inzichten worden posts die leads genereren).</p>
+
+        <p>De onderliggende these: als bouwen "plotseling makkelijk" is geworden, EN inzichten automatisch vertaald kunnen worden naar verbeteringen — dan zijn dat tegelijkertijd content-ideeën én marketing/sales.</p>
+
+        <hr />
+
+        <p><em>Dit is een werknotitie. Niet gepolijst, niet definitief. Geschreven om te delen, niet om te bewaren.</em></p>
+
+      </article>
+    </div>
+  </section>
+</Layout>

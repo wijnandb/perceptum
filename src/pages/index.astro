@@ -1,0 +1,220 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CTA from '../components/CTA.astro';
+---
+
+<Layout
+  title="Home"
+  description="Perceptum ontwikkelt digitale oplossingen en eigen producten. Opgericht door Wijnand Baretta, met 25+ jaar ervaring bij Ajax, Vodafone, KPN, Rabobank en meer."
+>
+  <!-- Hero — animated geometric -->
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[90vh] flex flex-col justify-center">
+    <!-- Solar system animation — sun at center (400,400), all orbits centered on sun -->
+    <div class="absolute inset-0 overflow-hidden">
+      <svg id="solar-system" class="absolute top-1/2 right-0 -translate-y-1/2 w-[800px] h-[800px] md:w-[900px] md:h-[900px]" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="sun-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(251,191,36,0.9)"/>
+            <stop offset="30%" stop-color="rgba(251,146,60,0.4)"/>
+            <stop offset="60%" stop-color="rgba(59,130,246,0.1)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <radialGradient id="sun-core" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
+            <stop offset="40%" stop-color="rgba(251,191,36,0.9)"/>
+            <stop offset="100%" stop-color="rgba(251,146,60,0.6)"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Orbit paths — all centered on 400,400 -->
+        <circle cx="400" cy="400" r="70" stroke="rgba(148,163,184,0.12)" stroke-width="0.5" fill="none"/>
+        <circle cx="400" cy="400" r="120" stroke="rgba(148,163,184,0.10)" stroke-width="0.5" fill="none"/>
+        <circle cx="400" cy="400" r="180" stroke="rgba(148,163,184,0.08)" stroke-width="0.5" fill="none"/>
+        <circle cx="400" cy="400" r="250" stroke="rgba(148,163,184,0.06)" stroke-width="0.5" fill="none"/>
+        <circle cx="400" cy="400" r="330" stroke="rgba(148,163,184,0.04)" stroke-width="0.5" fill="none"/>
+
+        <!-- Sun glow -->
+        <circle cx="400" cy="400" r="100" fill="url(#sun-glow)">
+          <animate attributeName="r" values="90;110;90" dur="8s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="8s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Sun core -->
+        <circle cx="400" cy="400" r="22" fill="url(#sun-core)">
+          <animate attributeName="r" values="20;24;20" dur="4s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Mercury — r=70 orbit, center 400,400 -->
+        <circle r="3.5" fill="rgba(203,213,225,0.9)">
+          <animateMotion dur="7s" repeatCount="indefinite"
+            path="M400,330 A70,70 0 0,1 470,400 A70,70 0 0,1 400,470 A70,70 0 0,1 330,400 A70,70 0 0,1 400,330"/>
+        </circle>
+
+        <!-- Venus — r=120 orbit -->
+        <circle r="5" fill="rgba(251,191,36,0.75)">
+          <animateMotion dur="12s" repeatCount="indefinite"
+            path="M400,280 A120,120 0 0,1 520,400 A120,120 0 0,1 400,520 A120,120 0 0,1 280,400 A120,120 0 0,1 400,280"/>
+        </circle>
+
+        <!-- Earth + Moon — r=180 orbit -->
+        <g>
+          <animateMotion dur="20s" repeatCount="indefinite"
+            path="M400,220 A180,180 0 0,1 580,400 A180,180 0 0,1 400,580 A180,180 0 0,1 220,400 A180,180 0 0,1 400,220"/>
+          <circle cx="0" cy="0" r="7" fill="rgba(59,130,246,0.85)"/>
+          <circle r="2" fill="rgba(203,213,225,0.7)">
+            <animateMotion dur="3s" repeatCount="indefinite"
+              path="M0,-14 A14,14 0 0,1 14,0 A14,14 0 0,1 0,14 A14,14 0 0,1 -14,0 A14,14 0 0,1 0,-14"/>
+          </circle>
+        </g>
+
+        <!-- Mars — r=250 orbit -->
+        <circle r="5" fill="rgba(239,68,68,0.6)">
+          <animateMotion dur="32s" repeatCount="indefinite"
+            path="M400,150 A250,250 0 0,1 650,400 A250,250 0 0,1 400,650 A250,250 0 0,1 150,400 A250,250 0 0,1 400,150"/>
+        </circle>
+
+        <!-- Jupiter + moons — r=330 orbit -->
+        <g>
+          <animateMotion dur="50s" repeatCount="indefinite"
+            path="M400,70 A330,330 0 0,1 730,400 A330,330 0 0,1 400,730 A330,330 0 0,1 70,400 A330,330 0 0,1 400,70"/>
+          <circle cx="0" cy="0" r="12" fill="rgba(217,169,119,0.5)"/>
+          <ellipse cx="0" cy="0" rx="12" ry="3" fill="none" stroke="rgba(180,140,90,0.3)" stroke-width="1.5"/>
+          <circle r="1.5" fill="rgba(203,213,225,0.6)">
+            <animateMotion dur="2s" repeatCount="indefinite"
+              path="M0,-18 A18,18 0 0,1 18,0 A18,18 0 0,1 0,18 A18,18 0 0,1 -18,0 A18,18 0 0,1 0,-18"/>
+          </circle>
+          <circle r="1.5" fill="rgba(251,191,36,0.5)">
+            <animateMotion dur="3.5s" repeatCount="indefinite"
+              path="M0,-24 A24,24 0 0,1 24,0 A24,24 0 0,1 0,24 A24,24 0 0,1 -24,0 A24,24 0 0,1 0,-24"/>
+          </circle>
+        </g>
+
+        <!-- Stars -->
+        <circle cx="80" cy="80" r="1" fill="rgba(255,255,255,0.3)"><animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/></circle>
+        <circle cx="720" cy="60" r="1" fill="rgba(255,255,255,0.25)"><animate attributeName="opacity" values="0.15;0.4;0.15" dur="4s" repeatCount="indefinite"/></circle>
+        <circle cx="200" cy="700" r="1" fill="rgba(255,255,255,0.2)"><animate attributeName="opacity" values="0.1;0.35;0.1" dur="5s" repeatCount="indefinite"/></circle>
+        <circle cx="60" cy="500" r="0.8" fill="rgba(255,255,255,0.2)"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3.5s" repeatCount="indefinite"/></circle>
+        <circle cx="680" cy="650" r="1" fill="rgba(255,255,255,0.15)"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="4.5s" repeatCount="indefinite"/></circle>
+        <circle cx="550" cy="100" r="0.8" fill="rgba(255,255,255,0.2)"><animate attributeName="opacity" values="0.15;0.35;0.15" dur="2.5s" repeatCount="indefinite"/></circle>
+        <circle cx="750" cy="350" r="0.8" fill="rgba(255,255,255,0.15)"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/></circle>
+      </svg>
+    </div>
+
+    <div class="container-narrow mx-auto px-6 py-28 md:py-36 lg:py-44 relative z-10">
+      <p class="text-accent font-medium text-sm tracking-wide uppercase mb-6 animate-on-scroll">Perceptum &mdash; Wijnand Baretta</p>
+      <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.08] mb-8 max-w-4xl animate-on-scroll">
+        25 jaar bouwen.<br />
+        Van eerste mobiele sites<br />
+        <span class="text-accent">tot AI van vandaag.</span>
+      </h1>
+      <p class="text-lg md:text-xl text-slate-400 leading-relaxed max-w-xl mb-12 animate-on-scroll delay-1">
+        Digitale producten en platforms voor organisaties die resultaat<br class="hidden sm:block" />
+        verkiezen boven vergaderen.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 animate-on-scroll delay-2">
+        <a href="/projecten/" class="btn-primary">
+          Bekijk onze projecten
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a href="/contact/" class="btn-secondary">
+          Neem contact op
+        </a>
+      </div>
+    </div>
+
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Social proof -->
+  <section class="py-14 md:py-16 px-6 border-b border-slate-200/60">
+    <div class="container-narrow mx-auto text-center">
+      <p class="text-xs text-slate-400 uppercase tracking-widest font-medium mb-6">Gebouwd voor</p>
+      <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+        <span class="text-lg md:text-xl font-semibold text-slate-700/70">Ajax</span>
+        <span class="text-lg md:text-xl font-semibold text-slate-700/70">Vodafone</span>
+        <span class="text-lg md:text-xl font-semibold text-slate-700/70">KPN</span>
+        <span class="text-lg md:text-xl font-semibold text-slate-700/70">Rabobank</span>
+        <span class="text-lg md:text-xl font-semibold text-slate-700/70">Eredivisie</span>
+        <span class="text-lg md:text-xl font-semibold text-slate-700/70">FOX Sports</span>
+        <span class="text-lg md:text-xl font-semibold text-slate-700/70">Incision</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Current work -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        <div>
+          <h2 class="heading-lg text-navy-900 mb-6">Wat wij doen</h2>
+          <div class="space-y-4 text-slate-600 leading-relaxed">
+            <p>
+              Wij bouwen digitale producten en platforms. Niet als bureau met twintig projectmanagers, maar als technisch team dat zelf ontwerpt, bouwt en beheert. E&eacute;n aanspreekpunt, korte lijnen, werkende software.
+            </p>
+            <p>
+              Daarnaast ontwikkelen wij eigen producten zoals FormBridge. Wat wij voor klanten bouwen, zetten wij ook voor onszelf in. Dat houdt ons scherp.
+            </p>
+          </div>
+        </div>
+        <div class="space-y-6">
+          <a href="/projecten/formbridge/" class="block group">
+            <div class="card p-6">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-navy-900 group-hover:text-accent transition-colors">FormBridge</h3>
+                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">Actief</span>
+              </div>
+              <p class="text-sm text-slate-500">Eigen product: formulieren-backend voor statische websites. Duizenden inzendingen per maand, GDPR-compliant.</p>
+            </div>
+          </a>
+          <a href="/projecten/#brede-school" class="block group">
+            <div class="card p-6">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-navy-900 group-hover:text-accent transition-colors">Brede School Zuidoost</h3>
+                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">Actief</span>
+              </div>
+              <p class="text-sm text-slate-500">Registratieplatform voor naschoolse activiteiten in Amsterdam Zuidoost. Honderden inschrijvingen per periode.</p>
+            </div>
+          </a>
+          <a href="/projecten/#chatbot" class="block group">
+            <div class="card p-6">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-navy-900 group-hover:text-accent transition-colors">AI Chatbot</h3>
+                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">Actief</span>
+              </div>
+              <p class="text-sm text-slate-500">Maakt organisatiekennisbanken doorzoekbaar via natuurlijke taal. Beantwoordt klantvragen 24/7.</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy quote -->
+  <section class="py-20 px-6 bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <blockquote class="text-2xl md:text-3xl font-semibold text-navy-900 leading-snug text-center max-w-3xl mx-auto animate-on-scroll">
+        &ldquo;De toekomst wordt geschreven door bouwers, niet door planners.&rdquo;
+      </blockquote>
+      <p class="text-center text-sm text-slate-400 mt-4">
+        &mdash; Wijnand Baretta, oprichter Perceptum
+      </p>
+    </div>
+  </section>
+
+  <CTA />
+</Layout>
+
+<script>
+  // Randomize planet starting positions by setting negative begin offsets
+  document.querySelectorAll('#solar-system animateMotion').forEach((anim) => {
+    const dur = parseFloat(anim.getAttribute('dur') || '10');
+    const offset = -(Math.random() * dur);
+    anim.setAttribute('begin', offset.toFixed(2) + 's');
+  });
+</script>

@@ -1,0 +1,143 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Pendulum Wave" description="Vijftien slingers die samen golven creëren — sync, desync, en weer terug.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Pendulum Wave</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">T = 2π√(L/g) — elk net iets anders</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NUM_PENDULUMS = 15;
+  // Each pendulum completes a different number of oscillations in ~60 seconds
+  // Pendulum i completes (BASE_FREQ + i) oscillations in the cycle period
+  const CYCLE_PERIOD = 60; // seconds for full realignment
+  const BASE_FREQ = 24; // base number of oscillations per cycle
+  const MAX_ANGLE = Math.PI / 4; // 45 degrees max swing
+
+  let startTime = performance.now();
+
+  interface PendulumTrail {
+    x: number;
+    y: number;
+  }
+
+  const trails: PendulumTrail[][] = Array.from({ length: NUM_PENDULUMS }, () => []);
+  const TRAIL_LENGTH = 8;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const elapsed = (performance.now() - startTime) / 1000;
+    const marginX = canvas.width * 0.1;
+    const spacing = (canvas.width - 2 * marginX) / (NUM_PENDULUMS - 1);
+    const pivotY = canvas.height * 0.12;
+    const maxLength = canvas.height * 0.55;
+    const minLength = canvas.height * 0.3;
+
+    // Draw pivot bar
+    ctx.beginPath();
+    ctx.moveTo(marginX - 20, pivotY);
+    ctx.lineTo(canvas.width - marginX + 20, pivotY);
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    for (let i = 0; i < NUM_PENDULUMS; i++) {
+      const freq = BASE_FREQ + i;
+      const omega = (2 * Math.PI * freq) / CYCLE_PERIOD;
+      const angle = MAX_ANGLE * Math.sin(omega * elapsed);
+
+      // Length varies per pendulum (shorter = faster, matching the frequency)
+      const length = minLength + ((maxLength - minLength) * (NUM_PENDULUMS - 1 - i)) / (NUM_PENDULUMS - 1);
+
+      const pivotX = marginX + i * spacing;
+      const bobX = pivotX + length * Math.sin(angle);
+      const bobY = pivotY + length * Math.cos(angle);
+      const bobR = 8 + (i / NUM_PENDULUMS) * 6;
+
+      // Store trail
+      trails[i].push({ x: bobX, y: bobY });
+      if (trails[i].length > TRAIL_LENGTH) trails[i].shift();
+
+      // Draw trail
+      for (let t = 0; t < trails[i].length - 1; t++) {
+        const alpha = ((t + 1) / trails[i].length) * 0.25;
+        ctx.beginPath();
+        ctx.arc(trails[i][t].x, trails[i][t].y, bobR * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
+        ctx.fill();
+      }
+
+      // Draw string
+      ctx.beginPath();
+      ctx.moveTo(pivotX, pivotY);
+      ctx.lineTo(bobX, bobY);
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Draw bob
+      const isAmber = i % 4 === 0;
+      ctx.beginPath();
+      ctx.arc(bobX, bobY, bobR, 0, Math.PI * 2);
+      if (isAmber) {
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.8)';
+      } else {
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.7)';
+      }
+      ctx.fill();
+
+      // Glow
+      ctx.beginPath();
+      ctx.arc(bobX, bobY, bobR + 4, 0, Math.PI * 2);
+      if (isAmber) {
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.15)';
+      } else {
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+      }
+      ctx.fill();
+
+      // Highlight on bob
+      ctx.beginPath();
+      ctx.arc(bobX - bobR * 0.25, bobY - bobR * 0.3, bobR * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.fill();
+
+      // Draw pivot point
+      ctx.beginPath();
+      ctx.arc(pivotX, pivotY, 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.6)';
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>

@@ -1,0 +1,182 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CTA from '../components/CTA.astro';
+
+const timeline = [
+  { year: '1999', event: 'Oprichting Pascolo, digitaal bureau in Amsterdam' },
+  { year: '2002', event: 'Eerste mobiele websites voor Ajax, PSV en Feyenoord' },
+  { year: '2002', event: 'Lancering Eredivisie Profcoach — een van de eerste fantasy football-platforms van Nederland' },
+  { year: '2005', event: 'Winnaar I-mode Vak Award voor Sportsplaza' },
+  { year: '2007', event: 'Pascolo gegroeid naar 35 medewerkers (Amsterdam + Izmir). Overdracht aan het team, gaat verder als Relephant' },
+  { year: '2008', event: 'Oprichting Perceptum' },
+  { year: '2013', event: 'Relephant overgenomen door Emakina Group (beursgenoteerd, 18 landen)' },
+  { year: '2014', event: 'Ontwikkeling Incision — chirurgisch trainingsplatform (nu wereldwijd in gebruik)' },
+  { year: '2015', event: 'Start CodeCult — programmeeronderwijs voor kinderen door heel Nederland' },
+  { year: '2020', event: 'Lancering Brede School Zuidoost voor PPOZO' },
+  { year: '2021', event: 'Emakina overgenomen door EPAM Systems (NYSE: EPAM) — afronding aandeelhouderschap' },
+  { year: '2024', event: 'Focus op AI-automatisering en eigen producten' },
+];
+---
+
+<Layout
+  title="Over Perceptum"
+  description="Perceptum werd opgericht in 2008 door Wijnand Baretta. 25+ jaar ervaring in digitale innovatie, van de eerste mobiele sites voor Ajax en Feyenoord tot AI-oplossingen van vandaag."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <!-- Constellation / connected nodes animation -->
+    <div class="absolute inset-0 overflow-hidden">
+      <svg class="absolute top-1/2 right-0 -translate-y-1/2 w-[700px] h-[700px] md:w-[800px] md:h-[800px]" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Connection lines -->
+        <line x1="150" y1="120" x2="300" y2="200" stroke="rgba(251,191,36,0.15)" stroke-width="1">
+          <animate attributeName="opacity" values="0.1;0.25;0.1" dur="4s" repeatCount="indefinite"/>
+        </line>
+        <line x1="300" y1="200" x2="450" y2="150" stroke="rgba(59,130,246,0.12)" stroke-width="1">
+          <animate attributeName="opacity" values="0.08;0.2;0.08" dur="5s" repeatCount="indefinite"/>
+        </line>
+        <line x1="300" y1="200" x2="250" y2="350" stroke="rgba(251,191,36,0.12)" stroke-width="1">
+          <animate attributeName="opacity" values="0.1;0.2;0.1" dur="3.5s" repeatCount="indefinite"/>
+        </line>
+        <line x1="250" y1="350" x2="420" y2="380" stroke="rgba(59,130,246,0.1)" stroke-width="1">
+          <animate attributeName="opacity" values="0.08;0.18;0.08" dur="6s" repeatCount="indefinite"/>
+        </line>
+        <line x1="420" y1="380" x2="450" y2="150" stroke="rgba(251,191,36,0.1)" stroke-width="1">
+          <animate attributeName="opacity" values="0.06;0.15;0.06" dur="4.5s" repeatCount="indefinite"/>
+        </line>
+        <line x1="250" y1="350" x2="100" y2="420" stroke="rgba(59,130,246,0.08)" stroke-width="1">
+          <animate attributeName="opacity" values="0.05;0.15;0.05" dur="5.5s" repeatCount="indefinite"/>
+        </line>
+        <line x1="420" y1="380" x2="500" y2="500" stroke="rgba(251,191,36,0.08)" stroke-width="1">
+          <animate attributeName="opacity" values="0.06;0.14;0.06" dur="4s" repeatCount="indefinite"/>
+        </line>
+        <line x1="300" y1="200" x2="180" y2="280" stroke="rgba(59,130,246,0.1)" stroke-width="1">
+          <animate attributeName="opacity" values="0.08;0.18;0.08" dur="3s" repeatCount="indefinite"/>
+        </line>
+        <line x1="180" y1="280" x2="250" y2="350" stroke="rgba(251,191,36,0.1)" stroke-width="1">
+          <animate attributeName="opacity" values="0.07;0.16;0.07" dur="5s" repeatCount="indefinite"/>
+        </line>
+
+        <!-- Nodes -->
+        <circle cx="150" cy="120" r="4" fill="rgba(251,191,36,0.7)">
+          <animate attributeName="r" values="3;5;3" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="300" cy="200" r="6" fill="rgba(59,130,246,0.8)">
+          <animate attributeName="r" values="5;7;5" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="450" cy="150" r="4" fill="rgba(251,191,36,0.6)">
+          <animate attributeName="r" values="3;5;3" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="250" cy="350" r="5" fill="rgba(59,130,246,0.7)">
+          <animate attributeName="r" values="4;6;4" dur="5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="420" cy="380" r="4" fill="rgba(251,191,36,0.65)">
+          <animate attributeName="r" values="3;5;3" dur="4.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="100" cy="420" r="3" fill="rgba(59,130,246,0.5)">
+          <animate attributeName="r" values="2;4;2" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="500" cy="500" r="3" fill="rgba(251,191,36,0.5)">
+          <animate attributeName="r" values="2;4;2" dur="5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="180" cy="280" r="3.5" fill="rgba(203,213,225,0.6)">
+          <animate attributeName="r" values="2.5;4.5;2.5" dur="4s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Traveling dot along a connection -->
+        <circle r="2" fill="rgba(251,191,36,0.9)">
+          <animateMotion dur="6s" repeatCount="indefinite" path="M150,120 L300,200 L450,150 L420,380 L250,350 L300,200"/>
+        </circle>
+        <circle r="1.5" fill="rgba(59,130,246,0.8)">
+          <animateMotion dur="8s" repeatCount="indefinite" path="M250,350 L180,280 L300,200 L250,350 L100,420 L250,350"/>
+        </circle>
+      </svg>
+    </div>
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <h1 class="heading-xl text-white mb-6">Over Perceptum</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Technologie die werkt begint bij mensen die begrijpen wat u nodig heeft.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Founder intro — lead with credibility -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl">
+        <h2 class="heading-lg text-navy-900 mb-6">Wijnand Baretta</h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed text-lg">
+          <p>
+            Oprichter van Perceptum (2008) en daarvoor van Pascolo, een digitaal bureau dat hij opbouwde van nul naar 35 medewerkers met kantoren in Amsterdam en Izmir (1999&ndash;2007).
+          </p>
+          <p>
+            In 25 jaar bouwde hij digitale producten voor Ajax, Vodafone, KPN, Rabobank, de Eredivisie en FOX Sports. Van de allereerste mobiele websites voor Nederlandse voetbalclubs tot chirurgische trainingsplatforms die nu wereldwijd worden gebruikt.
+          </p>
+          <p>
+            Vandaag richt Perceptum zich op AI-toepassingen, platforms en eigen producten. Vanuit Noordwijk, voor organisaties door heel Nederland.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How we work -->
+  <section class="section-padding bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <h2 class="heading-lg text-navy-900 mb-12">Hoe wij werken</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="animate-on-scroll">
+          <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-navy-900 text-lg mb-2">E&eacute;n aanspreekpunt</h3>
+          <p class="text-slate-500">U praat met de mensen die ook daadwerkelijk bouwen. Geen projectmanagers als tussenschakel, geen stille-post-effect.</p>
+        </div>
+        <div class="animate-on-scroll delay-1">
+          <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-navy-900 text-lg mb-2">Werkend binnen weken</h3>
+          <p class="text-slate-500">Geen maanden discovery. Wij beginnen met een werkend prototype en itereren van daaruit. U ziet snel of het de goede kant opgaat.</p>
+        </div>
+        <div class="animate-on-scroll delay-2">
+          <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-navy-900 text-lg mb-2">Gebouwd om te blijven</h3>
+          <p class="text-slate-500">Wij leveren software die u zelf kunt beheren en uitbreiden. Geen afhankelijkheid, geen vendor lock-in, overdraagbare code.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Founder + Timeline -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl mb-16">
+        <h2 class="heading-lg text-navy-900 mb-6">Tijdlijn</h2>
+      </div>
+
+      <div class="border-l-2 border-slate-200 ml-4">
+        {timeline.map((item) => (
+          <div class="relative pl-8 pb-8 last:pb-0 animate-on-scroll">
+            <div class="absolute left-[-5px] top-1.5 w-2 h-2 rounded-full bg-accent"></div>
+            <span class="text-xs font-bold text-accent">{item.year}</span>
+            <p class="text-slate-600 mt-0.5">{item.event}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CTA />
+</Layout>

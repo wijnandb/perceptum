@@ -1,0 +1,271 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Maze Generator" description="Doolhof-algoritme — kijk hoe het pad zich ontvouwt, stap voor stap.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Maze Generator</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">Recursive backtracking</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  const CELL_SIZE = 20;
+  const WALL_COLOR = 'rgba(59, 130, 246, 0.6)';
+  const VISITED_FILL = 'rgba(59, 130, 246, 0.08)';
+  const CURRENT_FILL = 'rgba(251, 191, 36, 0.7)';
+  const SOLVE_COLOR = 'rgba(251, 191, 36, 0.8)';
+
+  interface Cell {
+    row: number;
+    col: number;
+    walls: [boolean, boolean, boolean, boolean]; // top, right, bottom, left
+    visited: boolean;
+  }
+
+  let cols = 0;
+  let rows = 0;
+  let grid: Cell[][] = [];
+  let stack: Cell[] = [];
+  let current: Cell | null = null;
+  let phase: 'generating' | 'pause-before-solve' | 'solving' | 'pause-before-reset' | 'fading' = 'generating';
+  let pauseStart = 0;
+  let solvePath: Cell[] = [];
+  let solveIndex = 0;
+  let fadeAlpha = 1;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  function initGrid() {
+    const w = canvas.width;
+    const h = canvas.height;
+    cols = Math.floor((w - 40) / CELL_SIZE);
+    rows = Math.floor((h - 40) / CELL_SIZE);
+    if (cols < 4) cols = 4;
+    if (rows < 4) rows = 4;
+    offsetX = Math.floor((w - cols * CELL_SIZE) / 2);
+    offsetY = Math.floor((h - rows * CELL_SIZE) / 2);
+
+    grid = [];
+    for (let r = 0; r < rows; r++) {
+      grid[r] = [];
+      for (let c = 0; c < cols; c++) {
+        grid[r][c] = { row: r, col: c, walls: [true, true, true, true], visited: false };
+      }
+    }
+
+    current = grid[0][0];
+    current.visited = true;
+    stack = [current];
+    phase = 'generating';
+    solvePath = [];
+    solveIndex = 0;
+    fadeAlpha = 1;
+  }
+
+  function getUnvisitedNeighbors(cell: Cell): Cell[] {
+    const { row, col } = cell;
+    const neighbors: Cell[] = [];
+    if (row > 0 && !grid[row - 1][col].visited) neighbors.push(grid[row - 1][col]);
+    if (col < cols - 1 && !grid[row][col + 1].visited) neighbors.push(grid[row][col + 1]);
+    if (row < rows - 1 && !grid[row + 1][col].visited) neighbors.push(grid[row + 1][col]);
+    if (col > 0 && !grid[row][col - 1].visited) neighbors.push(grid[row][col - 1]);
+    return neighbors;
+  }
+
+  function removeWalls(a: Cell, b: Cell) {
+    const dr = b.row - a.row;
+    const dc = b.col - a.col;
+    if (dr === -1) { a.walls[0] = false; b.walls[2] = false; }
+    if (dr === 1) { a.walls[2] = false; b.walls[0] = false; }
+    if (dc === 1) { a.walls[1] = false; b.walls[3] = false; }
+    if (dc === -1) { a.walls[3] = false; b.walls[1] = false; }
+  }
+
+  function generateStep() {
+    if (stack.length === 0) {
+      phase = 'pause-before-solve';
+      pauseStart = performance.now();
+      current = null;
+      return;
+    }
+
+    const neighbors = getUnvisitedNeighbors(current!);
+    if (neighbors.length > 0) {
+      const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+      removeWalls(current!, next);
+      next.visited = true;
+      stack.push(next);
+      current = next;
+    } else {
+      stack.pop();
+      current = stack.length > 0 ? stack[stack.length - 1] : null;
+    }
+  }
+
+  function solveMaze() {
+    // BFS from top-left to bottom-right
+    const start = grid[0][0];
+    const end = grid[rows - 1][cols - 1];
+    const visited = new Set<string>();
+    const parent = new Map<string, Cell | null>();
+    const queue: Cell[] = [start];
+    const key = (c: Cell) => `${c.row},${c.col}`;
+    visited.add(key(start));
+    parent.set(key(start), null);
+
+    while (queue.length > 0) {
+      const cell = queue.shift()!;
+      if (cell === end) break;
+
+      const { row, col } = cell;
+      const dirs: [number, number, number][] = [
+        [-1, 0, 0], [0, 1, 1], [1, 0, 2], [0, -1, 3]
+      ];
+      for (const [dr, dc, wallIdx] of dirs) {
+        if (cell.walls[wallIdx]) continue;
+        const nr = row + dr;
+        const nc = col + dc;
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+        const neighbor = grid[nr][nc];
+        const nk = key(neighbor);
+        if (visited.has(nk)) continue;
+        visited.add(nk);
+        parent.set(nk, cell);
+        queue.push(neighbor);
+      }
+    }
+
+    // Trace path
+    solvePath = [];
+    let c: Cell | null = end;
+    while (c) {
+      solvePath.unshift(c);
+      c = parent.get(key(c)) || null;
+    }
+    solveIndex = 0;
+  }
+
+  function drawCell(cell: Cell, alpha: number) {
+    const x = offsetX + cell.col * CELL_SIZE;
+    const y = offsetY + cell.row * CELL_SIZE;
+    const s = CELL_SIZE;
+
+    if (cell.visited) {
+      ctx.fillStyle = VISITED_FILL.replace('0.08', String(0.08 * alpha));
+      ctx.fillRect(x, y, s, s);
+    }
+
+    ctx.strokeStyle = WALL_COLOR.replace('0.6', String(0.6 * alpha));
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    if (cell.walls[0]) { ctx.moveTo(x, y); ctx.lineTo(x + s, y); }
+    if (cell.walls[1]) { ctx.moveTo(x + s, y); ctx.lineTo(x + s, y + s); }
+    if (cell.walls[2]) { ctx.moveTo(x, y + s); ctx.lineTo(x + s, y + s); }
+    if (cell.walls[3]) { ctx.moveTo(x, y); ctx.lineTo(x, y + s); }
+    ctx.stroke();
+  }
+
+  function draw(time: number) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (phase === 'generating') {
+      // Carve 2 steps per frame for speed
+      for (let i = 0; i < 2; i++) {
+        if (phase === 'generating') generateStep();
+      }
+    } else if (phase === 'pause-before-solve') {
+      if (time - pauseStart > 2000) {
+        solveMaze();
+        phase = 'solving';
+      }
+    } else if (phase === 'solving') {
+      solveIndex = Math.min(solveIndex + 2, solvePath.length);
+      if (solveIndex >= solvePath.length) {
+        phase = 'pause-before-reset';
+        pauseStart = time;
+      }
+    } else if (phase === 'pause-before-reset') {
+      if (time - pauseStart > 2000) {
+        phase = 'fading';
+      }
+    } else if (phase === 'fading') {
+      fadeAlpha -= 0.03;
+      if (fadeAlpha <= 0) {
+        initGrid();
+        return;
+      }
+    }
+
+    const alpha = fadeAlpha;
+
+    // Draw all cells
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        drawCell(grid[r][c], alpha);
+      }
+    }
+
+    // Draw current cell during generation
+    if (current && phase === 'generating') {
+      const x = offsetX + current.col * CELL_SIZE;
+      const y = offsetY + current.row * CELL_SIZE;
+      ctx.fillStyle = CURRENT_FILL;
+      ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+    }
+
+    // Draw solve path
+    if ((phase === 'solving' || phase === 'pause-before-reset' || phase === 'fading') && solvePath.length > 0) {
+      ctx.strokeStyle = SOLVE_COLOR.replace('0.8', String(0.8 * alpha));
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      const limit = Math.min(solveIndex, solvePath.length);
+      for (let i = 0; i < limit; i++) {
+        const cell = solvePath[i];
+        const cx = offsetX + cell.col * CELL_SIZE + CELL_SIZE / 2;
+        const cy = offsetY + cell.row * CELL_SIZE + CELL_SIZE / 2;
+        if (i === 0) ctx.moveTo(cx, cy);
+        else ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+
+      // Highlight solve head
+      if (phase === 'solving' && limit > 0) {
+        const head = solvePath[limit - 1];
+        const hx = offsetX + head.col * CELL_SIZE;
+        const hy = offsetY + head.row * CELL_SIZE;
+        ctx.fillStyle = CURRENT_FILL;
+        ctx.fillRect(hx + 2, hy + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  function resize() {
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    initGrid();
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(draw);
+</script>

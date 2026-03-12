@@ -1,0 +1,188 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Fractal Tree" description="Recursieve vertakkingen — een boom die groeit vanuit wiskundige regels.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Fractal Tree</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">branch(length, angle, depth)</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  let W = 0;
+  let H = 0;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  const MAX_DEPTH = 11;
+  const BRANCH_ANGLE = 27 * (Math.PI / 180);
+  const LENGTH_RATIO = 0.67;
+  const GROW_INTERVAL = 800;
+  const SWAY_DURATION = 4000;
+
+  interface Branch {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    depth: number;
+    lineWidth: number;
+  }
+
+  let allBranches: Branch[][] = [];
+  let currentDepth = 0;
+  let phase: 'growing' | 'swaying' | 'fading' = 'growing';
+  let phaseStart = 0;
+  let globalAlpha = 1;
+  let windTime = 0;
+
+  function buildTree() {
+    allBranches = [];
+    const trunkLen = Math.min(W, H) * 0.22;
+    const startX = W / 2;
+    const startY = H * 0.88;
+
+    function branch(x1: number, y1: number, length: number, angle: number, depth: number) {
+      if (depth > MAX_DEPTH || length < 2) return;
+
+      const x2 = x1 + Math.cos(angle) * length;
+      const y2 = y1 + Math.sin(angle) * length;
+      const lw = Math.max(1, (MAX_DEPTH - depth) * 1.2);
+
+      if (!allBranches[depth]) allBranches[depth] = [];
+      allBranches[depth].push({ x1, y1, x2, y2, depth, lineWidth: lw });
+
+      branch(x2, y2, length * LENGTH_RATIO, angle - BRANCH_ANGLE, depth + 1);
+      branch(x2, y2, length * LENGTH_RATIO, angle + BRANCH_ANGLE, depth + 1);
+    }
+
+    branch(startX, startY, trunkLen, -Math.PI / 2, 0);
+  }
+
+  function buildSwayTree(windOffset: number): Branch[][] {
+    const result: Branch[][] = [];
+    const trunkLen = Math.min(W, H) * 0.22;
+    const startX = W / 2;
+    const startY = H * 0.88;
+
+    function branch(x1: number, y1: number, length: number, angle: number, depth: number) {
+      if (depth > MAX_DEPTH || length < 2) return;
+
+      const sway = windOffset * (depth / MAX_DEPTH) * 0.06;
+      const swayedAngle = angle + sway;
+
+      const x2 = x1 + Math.cos(swayedAngle) * length;
+      const y2 = y1 + Math.sin(swayedAngle) * length;
+      const lw = Math.max(1, (MAX_DEPTH - depth) * 1.2);
+
+      if (!result[depth]) result[depth] = [];
+      result[depth].push({ x1, y1, x2, y2, depth, lineWidth: lw });
+
+      branch(x2, y2, length * LENGTH_RATIO, swayedAngle - BRANCH_ANGLE, depth + 1);
+      branch(x2, y2, length * LENGTH_RATIO, swayedAngle + BRANCH_ANGLE, depth + 1);
+    }
+
+    branch(startX, startY, trunkLen, -Math.PI / 2, 0);
+    return result;
+  }
+
+  function drawBranches(branches: Branch[][], maxDepth: number, alpha: number) {
+    for (let d = 0; d <= Math.min(maxDepth, branches.length - 1); d++) {
+      if (!branches[d]) continue;
+      for (const b of branches[d]) {
+        const isLeaf = d >= MAX_DEPTH - 2;
+        if (isLeaf) {
+          ctx.strokeStyle = `rgba(251, 191, 36, ${0.8 * alpha})`;
+        } else {
+          const brightness = 0.5 + (d / MAX_DEPTH) * 0.4;
+          ctx.strokeStyle = `rgba(59, 130, 246, ${brightness * alpha})`;
+        }
+        ctx.lineWidth = b.lineWidth;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(b.x1, b.y1);
+        ctx.lineTo(b.x2, b.y2);
+        ctx.stroke();
+      }
+    }
+  }
+
+  function startCycle() {
+    buildTree();
+    currentDepth = 0;
+    phase = 'growing';
+    phaseStart = performance.now();
+    globalAlpha = 1;
+  }
+
+  startCycle();
+
+  function loop(now: number) {
+    ctx.clearRect(0, 0, W, H);
+
+    if (phase === 'growing') {
+      const elapsed = now - phaseStart;
+      currentDepth = Math.min(Math.floor(elapsed / GROW_INTERVAL), MAX_DEPTH);
+      drawBranches(allBranches, currentDepth, 1);
+
+      if (currentDepth >= MAX_DEPTH) {
+        phase = 'swaying';
+        phaseStart = now;
+        windTime = 0;
+      }
+    } else if (phase === 'swaying') {
+      const elapsed = now - phaseStart;
+      windTime = elapsed;
+      const windOffset = Math.sin(elapsed * 0.002) * 2 + Math.sin(elapsed * 0.0013) * 1.5;
+      const swayBranches = buildSwayTree(windOffset);
+      drawBranches(swayBranches, MAX_DEPTH, 1);
+
+      if (elapsed > SWAY_DURATION) {
+        phase = 'fading';
+        phaseStart = now;
+      }
+    } else if (phase === 'fading') {
+      const elapsed = now - phaseStart;
+      const fadeDuration = 1500;
+      globalAlpha = Math.max(0, 1 - elapsed / fadeDuration);
+
+      const windOffset = Math.sin((windTime + elapsed) * 0.002) * 2;
+      const swayBranches = buildSwayTree(windOffset);
+      drawBranches(swayBranches, MAX_DEPTH, globalAlpha);
+
+      if (globalAlpha <= 0) {
+        startCycle();
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+</script>

@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Pagina niet gevonden"
+  description="De pagina die u zoekt bestaat niet of is verplaatst."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <h1 class="heading-xl text-white mb-6">404</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Deze pagina bestaat niet of is verplaatst.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-narrow mx-auto text-center">
+      <p class="text-slate-600 text-lg mb-8">
+        Misschien vindt u wat u zoekt via een van deze pagina's:
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/" class="btn-primary">
+          Naar de homepage
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a href="/contact/" class="btn-outline">
+          Neem contact op
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

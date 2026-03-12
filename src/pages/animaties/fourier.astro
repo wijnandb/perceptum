@@ -1,0 +1,162 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Fourier Epicycles" description="Roterende cirkels die samenwerken om vormen te tekenen.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Fourier Epicycles</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">f(t) = Σ cₙ · e^(i·n·t) — elke vorm als som van cirkels.</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // --- Generate infinity symbol (lemniscate) points ---
+  const N = 128;
+  const SCALE = 150;
+  const shapePoints: { x: number; y: number }[] = [];
+  for (let i = 0; i < N; i++) {
+    const t = (2 * Math.PI * i) / N;
+    const s = Math.sin(t);
+    const c = Math.cos(t);
+    const denom = 1 + s * s;
+    shapePoints.push({
+      x: (c / denom) * SCALE,
+      y: (s * c / denom) * SCALE,
+    });
+  }
+
+  // --- Discrete Fourier Transform ---
+  interface FourierTerm {
+    freq: number;
+    amp: number;
+    phase: number;
+    re: number;
+    im: number;
+  }
+
+  function dft(points: { x: number; y: number }[]): FourierTerm[] {
+    const n = points.length;
+    const result: FourierTerm[] = [];
+    for (let k = 0; k < n; k++) {
+      let re = 0;
+      let im = 0;
+      for (let j = 0; j < n; j++) {
+        const angle = (2 * Math.PI * k * j) / n;
+        re += points[j].x * Math.cos(angle) + points[j].y * Math.sin(angle);
+        im += points[j].y * Math.cos(angle) - points[j].x * Math.sin(angle);
+      }
+      re /= n;
+      im /= n;
+      result.push({
+        freq: k,
+        amp: Math.sqrt(re * re + im * im),
+        phase: Math.atan2(im, re),
+        re,
+        im,
+      });
+    }
+    return result;
+  }
+
+  const allTerms = dft(shapePoints);
+  // Sort by amplitude descending and take top epicycles
+  allTerms.sort((a, b) => b.amp - a.amp);
+  const NUM_EPICYCLES = 50;
+  const terms = allTerms.slice(0, NUM_EPICYCLES);
+
+  // --- Animation state ---
+  let time = 0;
+  const speed = (2 * Math.PI) / N;
+  const path: { x: number; y: number }[] = [];
+
+  function animate() {
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Walk the epicycle chain
+    let x = 0;
+    let y = 0;
+
+    for (let i = 0; i < terms.length; i++) {
+      const prevX = x;
+      const prevY = y;
+      const { freq, amp, phase } = terms[i];
+      const angle = freq * time + phase;
+      x += amp * Math.cos(angle);
+      y += amp * Math.sin(angle);
+
+      // Draw circle
+      ctx.beginPath();
+      ctx.arc(cx + prevX, cy + prevY, amp, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(59,130,246,0.25)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Draw radius line
+      ctx.beginPath();
+      ctx.moveTo(cx + prevX, cy + prevY);
+      ctx.lineTo(cx + x, cy + y);
+      ctx.strokeStyle = 'rgba(59,130,246,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // Store traced point
+    path.push({ x, y });
+
+    // Draw small dot at tip
+    ctx.beginPath();
+    ctx.arc(cx + x, cy + y, 2.5, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(59,130,246,0.9)';
+    ctx.fill();
+
+    // Draw traced path
+    if (path.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(cx + path[0].x, cy + path[0].y);
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(cx + path[i].x, cy + path[i].y);
+      }
+      ctx.strokeStyle = 'rgba(59,130,246,0.7)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Advance time
+    time += speed;
+
+    // Reset after one full cycle
+    if (time >= 2 * Math.PI) {
+      time = 0;
+      path.length = 0;
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+</script>
