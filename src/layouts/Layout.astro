@@ -8,12 +8,14 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
 const {
   title,
   description = 'Perceptum ontwikkelt digitale oplossingen en eigen producten. Opgericht door Wijnand Baretta, met 25+ jaar ervaring bij merken als Ajax, Vodafone, KPN en Rabobank.',
   ogImage = '/og-default.png',
+  noindex = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -32,7 +34,7 @@ const fullTitle = title === 'Home' ? 'Perceptum — Technologie die Werkt' : `${
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
     <meta name="author" content="Wijnand Baretta" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1"} />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
