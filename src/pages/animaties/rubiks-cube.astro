@@ -1,0 +1,597 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Rubik's Cube" description="Een Rubik's kubus die zichzelf scrambled en vervolgens stap voor stap oplost.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Rubik's Cube</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">Scramble → solve. 43 quintillion mogelijke toestanden, één oplossing.</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function resize() {
+    const parent = canvas.parentElement!;
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // --- Colors ---
+  const COLORS: Record<string, string> = {
+    W: '#ffffff', // white  - Up
+    Y: '#ffd500', // yellow - Down
+    R: '#b71234', // red    - Front
+    O: '#ff5800', // orange - Back
+    B: '#0046ad', // blue   - Right
+    G: '#009b48', // green  - Left
+  };
+
+  // --- Cube state: 6 faces, each 3x3 ---
+  // Face order: U=0, D=1, F=2, B=3, L=4, R=5
+  // Each face stored row-major [0..8]
+  type CubeState = string[][];
+
+  function solvedCube(): CubeState {
+    return [
+      Array(9).fill('W'), // U
+      Array(9).fill('Y'), // D
+      Array(9).fill('R'), // F
+      Array(9).fill('O'), // B
+      Array(9).fill('G'), // L
+      Array(9).fill('B'), // R
+    ];
+  }
+
+  function cloneCube(c: CubeState): CubeState {
+    return c.map(f => [...f]);
+  }
+
+  // Rotate a face 90° clockwise
+  function rotateFaceCW(face: string[]): string[] {
+    const n = [...face];
+    n[0]=face[6]; n[1]=face[3]; n[2]=face[0];
+    n[3]=face[7]; n[4]=face[4]; n[5]=face[1];
+    n[6]=face[8]; n[7]=face[5]; n[8]=face[2];
+    return n;
+  }
+
+  function rotateFaceCCW(face: string[]): string[] {
+    return rotateFaceCW(rotateFaceCW(rotateFaceCW(face)));
+  }
+
+  const U=0, D=1, F=2, B=3, L=4, R=5;
+
+  // Apply a move to the cube state (mutates)
+  function applyMove(c: CubeState, move: string): void {
+    const isPrime = move.endsWith("'");
+    const base = move.replace("'", "");
+    let times = isPrime ? 3 : 1;
+    for (let t = 0; t < times; t++) {
+      switch (base) {
+        case 'U': {
+          c[U] = rotateFaceCW(c[U]);
+          const tmp = [c[F][0], c[F][1], c[F][2]];
+          c[F][0]=c[R][0]; c[F][1]=c[R][1]; c[F][2]=c[R][2];
+          c[R][0]=c[B][0]; c[R][1]=c[B][1]; c[R][2]=c[B][2];
+          c[B][0]=c[L][0]; c[B][1]=c[L][1]; c[B][2]=c[L][2];
+          c[L][0]=tmp[0]; c[L][1]=tmp[1]; c[L][2]=tmp[2];
+          break;
+        }
+        case 'D': {
+          c[D] = rotateFaceCW(c[D]);
+          const tmp = [c[F][6], c[F][7], c[F][8]];
+          c[F][6]=c[L][6]; c[F][7]=c[L][7]; c[F][8]=c[L][8];
+          c[L][6]=c[B][6]; c[L][7]=c[B][7]; c[L][8]=c[B][8];
+          c[B][6]=c[R][6]; c[B][7]=c[R][7]; c[B][8]=c[R][8];
+          c[R][6]=tmp[0]; c[R][7]=tmp[1]; c[R][8]=tmp[2];
+          break;
+        }
+        case 'F': {
+          c[F] = rotateFaceCW(c[F]);
+          const tmp = [c[U][6], c[U][7], c[U][8]];
+          c[U][6]=c[L][8]; c[U][7]=c[L][5]; c[U][8]=c[L][2];
+          c[L][2]=c[D][0]; c[L][5]=c[D][1]; c[L][8]=c[D][2];
+          c[D][0]=c[R][6]; c[D][1]=c[R][3]; c[D][2]=c[R][0];
+          c[R][0]=tmp[0]; c[R][3]=tmp[1]; c[R][6]=tmp[2];
+          break;
+        }
+        case 'B': {
+          c[B] = rotateFaceCW(c[B]);
+          const tmp = [c[U][0], c[U][1], c[U][2]];
+          c[U][0]=c[R][2]; c[U][1]=c[R][5]; c[U][2]=c[R][8];
+          c[R][2]=c[D][8]; c[R][5]=c[D][7]; c[R][8]=c[D][6];
+          c[D][6]=c[L][0]; c[D][7]=c[L][3]; c[D][8]=c[L][6];
+          c[L][0]=tmp[2]; c[L][3]=tmp[1]; c[L][6]=tmp[0];
+          break;
+        }
+        case 'L': {
+          c[L] = rotateFaceCW(c[L]);
+          const tmp = [c[U][0], c[U][3], c[U][6]];
+          c[U][0]=c[B][8]; c[U][3]=c[B][5]; c[U][6]=c[B][2];
+          c[B][2]=c[D][6]; c[B][5]=c[D][3]; c[B][8]=c[D][0];
+          c[D][0]=c[F][0]; c[D][3]=c[F][3]; c[D][6]=c[F][6];
+          c[F][0]=tmp[0]; c[F][3]=tmp[1]; c[F][6]=tmp[2];
+          break;
+        }
+        case 'R': {
+          c[R] = rotateFaceCW(c[R]);
+          const tmp = [c[U][2], c[U][5], c[U][8]];
+          c[U][2]=c[F][2]; c[U][5]=c[F][5]; c[U][8]=c[F][8];
+          c[F][2]=c[D][2]; c[F][5]=c[D][5]; c[F][8]=c[D][8];
+          c[D][2]=c[B][6]; c[D][5]=c[B][3]; c[D][8]=c[B][0];
+          c[B][0]=tmp[8-0]; // tmp[2]
+          c[B][3]=tmp[1];
+          c[B][6]=tmp[0];
+          // fix: redo properly
+          break;
+        }
+      }
+    }
+    // Patch R move (cleaner)
+    if (base === 'R' && !isPrime) {
+      // Already applied above but the B assignment was messy; let's just redo from scratch
+    }
+  }
+
+  // Actually, let me rewrite applyMove more carefully
+  function applyMoveSafe(c: CubeState, move: string): void {
+    const isPrime = move.endsWith("'");
+    const base = move.replace("'", "");
+    // Apply CW once, or 3 times for prime
+    const times = isPrime ? 3 : 1;
+    for (let t = 0; t < times; t++) {
+      applyMoveCW(c, base);
+    }
+  }
+
+  function applyMoveCW(c: CubeState, face: string): void {
+    switch (face) {
+      case 'U': {
+        c[U] = rotateFaceCW(c[U]);
+        const t = [c[F][0], c[F][1], c[F][2]];
+        [c[F][0], c[F][1], c[F][2]] = [c[R][0], c[R][1], c[R][2]];
+        [c[R][0], c[R][1], c[R][2]] = [c[B][0], c[B][1], c[B][2]];
+        [c[B][0], c[B][1], c[B][2]] = [c[L][0], c[L][1], c[L][2]];
+        [c[L][0], c[L][1], c[L][2]] = t;
+        break;
+      }
+      case 'D': {
+        c[D] = rotateFaceCW(c[D]);
+        const t = [c[F][6], c[F][7], c[F][8]];
+        [c[F][6], c[F][7], c[F][8]] = [c[L][6], c[L][7], c[L][8]];
+        [c[L][6], c[L][7], c[L][8]] = [c[B][6], c[B][7], c[B][8]];
+        [c[B][6], c[B][7], c[B][8]] = [c[R][6], c[R][7], c[R][8]];
+        [c[R][6], c[R][7], c[R][8]] = t;
+        break;
+      }
+      case 'F': {
+        c[F] = rotateFaceCW(c[F]);
+        const t = [c[U][6], c[U][7], c[U][8]];
+        [c[U][6], c[U][7], c[U][8]] = [c[L][8], c[L][5], c[L][2]];
+        [c[L][2], c[L][5], c[L][8]] = [c[D][0], c[D][1], c[D][2]];
+        [c[D][0], c[D][1], c[D][2]] = [c[R][6], c[R][3], c[R][0]];
+        [c[R][0], c[R][3], c[R][6]] = t;
+        break;
+      }
+      case 'B': {
+        c[B] = rotateFaceCW(c[B]);
+        const t = [c[U][0], c[U][1], c[U][2]];
+        [c[U][0], c[U][1], c[U][2]] = [c[R][2], c[R][5], c[R][8]];
+        [c[R][2], c[R][5], c[R][8]] = [c[D][8], c[D][7], c[D][6]];
+        [c[D][6], c[D][7], c[D][8]] = [c[L][0], c[L][3], c[L][6]];
+        [c[L][0], c[L][3], c[L][6]] = [t[2], t[1], t[0]];
+        break;
+      }
+      case 'L': {
+        c[L] = rotateFaceCW(c[L]);
+        const t = [c[U][0], c[U][3], c[U][6]];
+        [c[U][0], c[U][3], c[U][6]] = [c[B][8], c[B][5], c[B][2]];
+        [c[B][2], c[B][5], c[B][8]] = [c[D][6], c[D][3], c[D][0]];
+        [c[D][0], c[D][3], c[D][6]] = [c[F][0], c[F][3], c[F][6]];
+        [c[F][0], c[F][3], c[F][6]] = t;
+        break;
+      }
+      case 'R': {
+        c[R] = rotateFaceCW(c[R]);
+        const t = [c[U][2], c[U][5], c[U][8]];
+        [c[U][2], c[U][5], c[U][8]] = [c[F][2], c[F][5], c[F][8]];
+        [c[F][2], c[F][5], c[F][8]] = [c[D][2], c[D][5], c[D][8]];
+        [c[D][2], c[D][5], c[D][8]] = [c[B][6], c[B][3], c[B][0]];
+        [c[B][0], c[B][3], c[B][6]] = t;
+        break;
+      }
+    }
+  }
+
+  function inverseMove(m: string): string {
+    return m.endsWith("'") ? m.slice(0, -1) : m + "'";
+  }
+
+  // --- 3D rendering ---
+  type Vec3 = [number, number, number];
+
+  function rotateY(p: Vec3, a: number): Vec3 {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [p[0]*c + p[2]*s, p[1], -p[0]*s + p[2]*c];
+  }
+
+  function rotateX(p: Vec3, a: number): Vec3 {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [p[0], p[1]*c - p[2]*s, p[1]*s + p[2]*c];
+  }
+
+  function rotateAroundAxis(p: Vec3, axis: Vec3, angle: number): Vec3 {
+    const [ux, uy, uz] = axis;
+    const c = Math.cos(angle), s = Math.sin(angle);
+    const [x, y, z] = p;
+    return [
+      (c + ux*ux*(1-c))*x + (ux*uy*(1-c) - uz*s)*y + (ux*uz*(1-c) + uy*s)*z,
+      (uy*ux*(1-c) + uz*s)*x + (c + uy*uy*(1-c))*y + (uy*uz*(1-c) - ux*s)*z,
+      (uz*ux*(1-c) - uy*s)*x + (uz*uy*(1-c) + ux*s)*y + (c + uz*uz*(1-c))*z,
+    ];
+  }
+
+  function project(p: Vec3, cx: number, cy: number, scale: number): [number, number] {
+    const perspective = 6;
+    const d = perspective / (perspective + p[2]);
+    return [cx + p[0] * scale * d, cy - p[1] * scale * d];
+  }
+
+  // Build sticker quads for the cube
+  interface Sticker {
+    corners3d: Vec3[];       // 4 corners in 3D model space
+    faceIndex: number;       // which face (0-5)
+    stickerIndex: number;    // which sticker on that face (0-8)
+    affectedByMove: string | null; // which face-move rotates this sticker's layer
+  }
+
+  function buildStickers(): Sticker[] {
+    const stickers: Sticker[] = [];
+    const gap = 0.06;
+    const size = 1 - gap * 2;
+
+    for (let fi = 0; fi < 6; fi++) {
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          const si = row * 3 + col;
+          // Local coords: x in [-1.5, 1.5], y in [-1.5, 1.5], on face plane
+          const lx = (col - 1) + 0;
+          const ly = -(row - 1);  // top row = +1
+          const x0 = lx - size/2, x1 = lx + size/2;
+          const y0 = ly - size/2, y1 = ly + size/2;
+
+          let corners: Vec3[];
+          let moveAffected: string | null = null;
+
+          switch (fi) {
+            case U: // y = +1.5, facing up
+              corners = [[x0,1.5,y0],[x1,1.5,y0],[x1,1.5,y1],[x0,1.5,y1]];
+              moveAffected = 'U';
+              break;
+            case D: // y = -1.5, facing down
+              corners = [[x0,-1.5,-y0],[x1,-1.5,-y0],[x1,-1.5,-y1],[x0,-1.5,-y1]];
+              moveAffected = 'D';
+              break;
+            case F: // z = +1.5, facing front
+              corners = [[x0,y0,1.5],[x1,y0,1.5],[x1,y1,1.5],[x0,y1,1.5]];
+              moveAffected = 'F';
+              break;
+            case B: // z = -1.5, facing back
+              corners = [[-x0,y0,-1.5],[-x1,y0,-1.5],[-x1,y1,-1.5],[-x0,y1,-1.5]];
+              moveAffected = 'B';
+              break;
+            case L: // x = -1.5, facing left
+              corners = [[-1.5,y0,-x0],[-1.5,y0,-x1],[-1.5,y1,-x1],[-1.5,y1,-x0]];
+              moveAffected = 'L';
+              break;
+            case R: // x = +1.5, facing right
+              corners = [[1.5,y0,x0],[1.5,y0,x1],[1.5,y1,x1],[1.5,y1,x0]];
+              moveAffected = 'R';
+              break;
+            default:
+              corners = [[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
+          }
+
+          // Determine which layer-moves affect this sticker
+          // (beyond its own face rotation, cubies on edges/corners are affected by adjacent moves)
+          // For rendering animation we only care about the face being turned
+
+          stickers.push({ corners3d: corners, faceIndex: fi, stickerIndex: si, affectedByMove: moveAffected });
+        }
+      }
+    }
+    return stickers;
+  }
+
+  // Determine which stickers are affected by a layer move
+  // When turning face X, stickers ON face X rotate, plus adjacent edge strips
+  // For rendering we rotate the 3D positions of stickers that belong to the turning layer
+  function getLayerStickers(stickers: Sticker[], move: string): Set<number> {
+    const base = move.replace("'", "");
+    const indices = new Set<number>();
+
+    // All stickers on the turning face
+    stickers.forEach((s, i) => {
+      if (s.affectedByMove === base) indices.add(i);
+    });
+
+    // Adjacent edge stickers
+    // For each adjacent face, find the 3 stickers that are in the turning layer
+    const adjacentMap: Record<string, [number, number[]][]> = {
+      'U': [[F, [0,1,2]], [R, [0,1,2]], [B, [0,1,2]], [L, [0,1,2]]],
+      'D': [[F, [6,7,8]], [L, [6,7,8]], [B, [6,7,8]], [R, [6,7,8]]],
+      'F': [[U, [6,7,8]], [R, [0,3,6]], [D, [0,1,2]], [L, [2,5,8]]],
+      'B': [[U, [0,1,2]], [L, [0,3,6]], [D, [6,7,8]], [R, [2,5,8]]],
+      'L': [[U, [0,3,6]], [F, [0,3,6]], [D, [0,3,6]], [B, [2,5,8]]],
+      'R': [[U, [2,5,8]], [B, [0,3,6]], [D, [2,5,8]], [F, [2,5,8]]],
+    };
+
+    adjacentMap[base]?.forEach(([faceIdx, sis]) => {
+      sis.forEach(si => {
+        const idx = faceIdx * 9 + si;
+        indices.add(idx);
+      });
+    });
+
+    return indices;
+  }
+
+  function getMoveAxis(move: string): { axis: Vec3; direction: number } {
+    const base = move.replace("'", "");
+    const dir = move.endsWith("'") ? 1 : -1;
+    switch (base) {
+      case 'U': return { axis: [0, 1, 0], direction: dir };
+      case 'D': return { axis: [0, 1, 0], direction: -dir };
+      case 'F': return { axis: [0, 0, 1], direction: dir };
+      case 'B': return { axis: [0, 0, 1], direction: -dir };
+      case 'R': return { axis: [1, 0, 0], direction: dir };
+      case 'L': return { axis: [1, 0, 0], direction: -dir };
+      default: return { axis: [0, 1, 0], direction: 1 };
+    }
+  }
+
+  // --- State ---
+  let cube = solvedCube();
+  const allStickers = buildStickers();
+  const SCRAMBLE_MOVES = 20;
+  const MOVE_NAMES = ['U', "U'", 'D', "D'", 'F', "F'", 'B', "B'", 'L', "L'", 'R', "R'"];
+
+  // Generate scramble
+  function generateScramble(): string[] {
+    const moves: string[] = [];
+    let lastBase = '';
+    for (let i = 0; i < SCRAMBLE_MOVES; i++) {
+      let m: string;
+      do {
+        m = MOVE_NAMES[Math.floor(Math.random() * MOVE_NAMES.length)];
+      } while (m.replace("'", "") === lastBase);
+      moves.push(m);
+      lastBase = m.replace("'", "");
+    }
+    return moves;
+  }
+
+  // --- Animation state ---
+  type Phase = 'scrambling' | 'pausing' | 'solving' | 'done' | 'celebrating';
+  let phase: Phase = 'scrambling';
+  let scrambleMoves: string[] = [];
+  let solveMoves: string[] = [];
+  let moveQueue: string[] = [];
+  let currentMoveIndex = 0;
+
+  // Current animated move
+  let animatingMove: string | null = null;
+  let animAngle = 0;
+  let animTargetAngle = Math.PI / 2;
+  let animSpeed = 0;
+  let animLayerIndices: Set<number> = new Set();
+  let animAxis: Vec3 = [0, 1, 0];
+  let animDirection = 1;
+
+  // Camera
+  let camRotY = -0.52;  // ~-30°
+  let camRotX = 0.52;   // ~30° looking down
+  let autoRotateSpeed = 0.003;
+  let celebrateStart = 0;
+
+  function startRound() {
+    cube = solvedCube();
+    scrambleMoves = generateScramble();
+    solveMoves = scrambleMoves.map(inverseMove).reverse();
+    moveQueue = [...scrambleMoves];
+    currentMoveIndex = 0;
+    phase = 'scrambling';
+    animSpeed = 0.12;  // fast scramble
+    startNextMove();
+  }
+
+  function startNextMove() {
+    if (currentMoveIndex >= moveQueue.length) {
+      if (phase === 'scrambling') {
+        phase = 'pausing';
+        setTimeout(() => {
+          phase = 'solving';
+          moveQueue = [...solveMoves];
+          currentMoveIndex = 0;
+          animSpeed = 0.06;  // slower solve for drama
+          startNextMove();
+        }, 1000);
+      } else if (phase === 'solving') {
+        phase = 'celebrating';
+        celebrateStart = performance.now();
+        setTimeout(() => {
+          startRound();
+        }, 4000);
+      }
+      return;
+    }
+
+    const move = moveQueue[currentMoveIndex];
+    animatingMove = move;
+    animAngle = 0;
+    animLayerIndices = getLayerStickers(allStickers, move);
+    const ma = getMoveAxis(move);
+    animAxis = ma.axis;
+    animDirection = ma.direction;
+  }
+
+  function updateAnimation() {
+    if (!animatingMove) return;
+
+    animAngle += animSpeed;
+    if (animAngle >= animTargetAngle) {
+      // Snap: apply move to logical state
+      applyMoveSafe(cube, animatingMove);
+      animatingMove = null;
+      animAngle = 0;
+      currentMoveIndex++;
+      startNextMove();
+    }
+  }
+
+  // --- Drawing ---
+  function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    updateAnimation();
+
+    // Auto-rotate camera slowly
+    if (phase !== 'celebrating') {
+      camRotY += autoRotateSpeed;
+    } else {
+      camRotY += 0.015; // faster spin when celebrating
+    }
+
+    const cx = w / 2;
+    const cy = h * 0.48;
+    const scale = Math.min(w, h) * 0.13;
+
+    // Collect all quads to render
+    interface Quad {
+      projected: [number, number][];
+      depth: number;
+      color: string;
+    }
+
+    const quads: Quad[] = [];
+
+    // Draw black cube body (6 faces of the shell)
+    const shellSize = 1.52;
+    const shellFaces: Vec3[][] = [
+      [[-shellSize, shellSize,-shellSize],[shellSize, shellSize,-shellSize],[shellSize, shellSize, shellSize],[-shellSize, shellSize, shellSize]], // top
+      [[-shellSize,-shellSize, shellSize],[shellSize,-shellSize, shellSize],[shellSize,-shellSize,-shellSize],[-shellSize,-shellSize,-shellSize]], // bottom
+      [[-shellSize,-shellSize, shellSize],[shellSize,-shellSize, shellSize],[shellSize, shellSize, shellSize],[-shellSize, shellSize, shellSize]], // front
+      [[shellSize,-shellSize,-shellSize],[-shellSize,-shellSize,-shellSize],[-shellSize, shellSize,-shellSize],[shellSize, shellSize,-shellSize]], // back
+      [[-shellSize,-shellSize,-shellSize],[-shellSize,-shellSize, shellSize],[-shellSize, shellSize, shellSize],[-shellSize, shellSize,-shellSize]], // left
+      [[shellSize,-shellSize, shellSize],[shellSize,-shellSize,-shellSize],[shellSize, shellSize,-shellSize],[shellSize, shellSize, shellSize]], // right
+    ];
+
+    shellFaces.forEach(corners => {
+      const transformed = corners.map(p => {
+        let pt = rotateY(p, camRotY);
+        pt = rotateX(pt, camRotX);
+        return pt;
+      });
+      const avgZ = transformed.reduce((s, p) => s + p[2], 0) / 4;
+      const proj = transformed.map(p => project(p, cx, cy, scale));
+      quads.push({ projected: proj, depth: avgZ, color: '#1a1a2e' });
+    });
+
+    // Draw stickers
+    allStickers.forEach((sticker, idx) => {
+      const color = COLORS[cube[sticker.faceIndex][sticker.stickerIndex]] || '#333';
+
+      const transformed = sticker.corners3d.map(p => {
+        let pt: Vec3 = [...p];
+
+        // If this sticker is part of the animating layer, rotate it
+        if (animatingMove && animLayerIndices.has(idx)) {
+          const angle = animAngle * animDirection;
+          pt = rotateAroundAxis(pt, animAxis, angle);
+        }
+
+        pt = rotateY(pt, camRotY);
+        pt = rotateX(pt, camRotX);
+        return pt;
+      });
+
+      const avgZ = transformed.reduce((s, p) => s + p[2], 0) / 4;
+      const proj = transformed.map(p => project(p, cx, cy, scale));
+      quads.push({ projected: proj, depth: avgZ, color });
+    });
+
+    // Painter's algorithm: draw far to near
+    quads.sort((a, b) => a.depth - b.depth);
+
+    quads.forEach(q => {
+      ctx.beginPath();
+      ctx.moveTo(q.projected[0][0], q.projected[0][1]);
+      for (let i = 1; i < q.projected.length; i++) {
+        ctx.lineTo(q.projected[i][0], q.projected[i][1]);
+      }
+      ctx.closePath();
+      ctx.fillStyle = q.color;
+      ctx.fill();
+      ctx.strokeStyle = '#0d0d1a';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    // Draw move label
+    if (animatingMove) {
+      const label = phase === 'scrambling' ? `Scramble: ${animatingMove}` : `Solve: ${animatingMove}`;
+      ctx.font = `${Math.max(16, Math.min(w, h) * 0.03)}px monospace`;
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, cx, h * 0.88);
+    }
+
+    // Draw phase indicator
+    const phaseLabels: Record<Phase, string> = {
+      scrambling: 'Scrambling...',
+      pausing: 'Ready to solve',
+      solving: 'Solving...',
+      done: '',
+      celebrating: 'Solved!',
+    };
+    if (phaseLabels[phase]) {
+      ctx.font = `bold ${Math.max(14, Math.min(w, h) * 0.025)}px monospace`;
+      ctx.fillStyle = phase === 'celebrating' ? 'rgba(0,255,136,0.9)' : 'rgba(255,255,255,0.5)';
+      ctx.textAlign = 'center';
+      ctx.fillText(phaseLabels[phase], cx, h * 0.92);
+    }
+
+    // Move counter
+    if (phase === 'scrambling' || phase === 'solving') {
+      const total = moveQueue.length;
+      const current = Math.min(currentMoveIndex + 1, total);
+      ctx.font = `${Math.max(12, Math.min(w, h) * 0.018)}px monospace`;
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${current} / ${total}`, cx, h * 0.95);
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  startRound();
+  requestAnimationFrame(draw);
+</script>
