@@ -1,5 +1,13 @@
 ---
+interface Props {
+  heading?: string;
+  subtitle?: string;
+}
 
+const {
+  heading = 'Heeft u een concreet vraagstuk?',
+  subtitle = 'Wij denken graag een halfuur met u mee. Geen verplichtingen, geen verkooppraatje.',
+} = Astro.props;
 ---
 
 <section class="gradient-navy relative overflow-hidden">
@@ -11,10 +19,10 @@
 
   <div class="container-narrow mx-auto px-6 py-20 md:py-28 text-center relative z-10">
     <h2 class="heading-lg text-white mb-6 text-balance animate-on-scroll">
-      Heeft u een concreet vraagstuk?
+      {heading}
     </h2>
     <p class="text-slate-300 text-lg mb-10 max-w-xl mx-auto animate-on-scroll delay-1">
-      Wij denken graag een halfuur met u mee. Geen verplichtingen, geen verkooppraatje.
+      {subtitle}
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center animate-on-scroll delay-2">
       <a href="/contact/" class="btn-primary">
