@@ -1,0 +1,91 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CTA from '../../components/CTA.astro';
+---
+
+<Layout
+  title="WebScan"
+  description="WebScan — laat uw website doorlichten op prestaties, beveiliging, vindbaarheid en toegankelijkheid. Helder rapport met concrete verbeterpunten."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <p class="text-accent font-medium text-sm tracking-wide uppercase mb-4">Product</p>
+      <h1 class="heading-xl text-white mb-6">WebScan</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Een grondige doorlichting van uw website. Prestaties, beveiliging, vindbaarheid en toegankelijkheid &mdash; alles in &eacute;&eacute;n overzichtelijk rapport.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- What it does -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl">
+        <h2 class="heading-lg text-navy-900 mb-6">Wat het doet</h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed text-lg">
+          <p>
+            WebScan analyseert uw website automatisch op elf onderdelen. U krijgt een helder rapport met scores, prioriteiten en concrete aanbevelingen. Geen vaag advies, maar punten die u (of uw webbouwer) direct kunt oppakken.
+          </p>
+          <p>
+            Wij gebruiken WebScan zelf om websites van klanten te beoordelen v&oacute;&oacute;r we aan de slag gaan. Zo weten we precies waar de verbetermogelijkheden liggen.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 categories -->
+  <section class="section-padding bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <h2 class="heading-lg text-navy-900 mb-12">Wat er wordt gecontroleerd</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[
+          { title: 'Prestaties', desc: 'Laadtijd, Core Web Vitals, serverresponstijd' },
+          { title: 'Vindbaarheid (SEO)', desc: 'Titels, meta-beschrijvingen, structuur, sitemap' },
+          { title: 'Beveiliging', desc: 'HTTPS, headers, kwetsbaarheden, mixed content' },
+          { title: 'Toegankelijkheid', desc: 'Contrast, alt-teksten, toetsenbordnavigatie' },
+          { title: 'Inhoud', desc: 'Leesbaarheid, spelfouten, ontbrekende pagina\'s' },
+          { title: 'Mobiel', desc: 'Responsief ontwerp, touch-targets, viewport' },
+          { title: 'Verbroken links', desc: 'Interne en externe links die niet meer werken' },
+          { title: 'Juridisch & GDPR', desc: 'Privacyverklaring, cookies, verwerkersovereenkomst' },
+          { title: 'Technologie', desc: 'CMS-versie, verouderde libraries, serverconfig' },
+          { title: 'Screenshots', desc: 'Visuele weergave op verschillende schermformaten' },
+          { title: 'Inventarisatie', desc: 'Overzicht van alle pagina\'s, afbeeldingen en bestanden' },
+        ].map((item) => (
+          <div class="bg-white rounded-xl border border-slate-200/60 p-4">
+            <h3 class="font-semibold text-navy-900 text-sm mb-1">{item.title}</h3>
+            <p class="text-slate-500 text-xs">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- The report -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl">
+        <h2 class="heading-lg text-navy-900 mb-6">Het rapport</h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed text-lg">
+          <p>
+            U ontvangt een professioneel rapport met een totaalscore, scores per categorie en een geprioriteerde lijst met verbeterpunten. De belangrijkste zaken staan bovenaan, zodat u weet waar u moet beginnen.
+          </p>
+          <p>
+            Het rapport is beschikbaar als interactieve HTML-pagina (handig om te delen) en als PDF. Alles in duidelijke taal, ook voor mensen die geen technische achtergrond hebben.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    heading="Wilt u weten hoe uw website ervoor staat?"
+    subtitle="Wij scannen uw website en bespreken het rapport met u. Vrijblijvend."
+  />
+</Layout>

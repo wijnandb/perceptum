@@ -1,0 +1,99 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CTA from '../../components/CTA.astro';
+---
+
+<Layout
+  title="AI Chatbot"
+  description="AI Chatbot van Perceptum — beantwoordt klantvragen op basis van uw eigen documentatie. Via de website en WhatsApp, 24 uur per dag."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <p class="text-accent font-medium text-sm tracking-wide uppercase mb-4">Product</p>
+      <h1 class="heading-xl text-white mb-6">AI Chatbot</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Een chatbot die uw eigen documentatie begrijpt. Beantwoordt klantvragen op basis van wat u al heeft opgeschreven &mdash; via uw website en via WhatsApp.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- What it does -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl">
+        <h2 class="heading-lg text-navy-900 mb-6">Het probleem</h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed text-lg">
+          <p>
+            De meeste organisaties hebben de antwoorden op klantvragen al ergens staan. In een FAQ, een handleiding, een beleidsdocument. Maar klanten vinden die informatie niet, of ze hebben geen zin om zelf te zoeken.
+          </p>
+          <p>
+            Het gevolg: uw medewerkers beantwoorden steeds dezelfde vragen. Dat kost tijd, het is repetitief, en het is precies het soort werk dat een computer beter kan.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section-padding bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <h2 class="heading-lg text-navy-900 mb-6">Hoe het werkt</h2>
+      <div class="max-w-3xl space-y-4 text-slate-600 leading-relaxed text-lg">
+        <p>
+          Wij trainen de chatbot op uw eigen documentatie: uw website, FAQ's, productinformatie, handleidingen. De chatbot leert de inhoud en kan vragen van klanten beantwoorden in gewone taal.
+        </p>
+        <p>
+          Klanten kunnen de chatbot bereiken via een widget op uw website of via WhatsApp. De antwoorden zijn gebaseerd op uw eigen informatie &mdash; de chatbot verzint niets.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <h2 class="heading-lg text-navy-900 mb-12">Wat het kan</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[
+          { title: 'Website-widget', desc: 'Een klein chatvenster op uw website. Bezoekers stellen een vraag, de chatbot antwoordt direct.' },
+          { title: 'WhatsApp', desc: 'Dezelfde chatbot, maar dan via WhatsApp. Klanten appen hun vraag en krijgen direct antwoord.' },
+          { title: 'Agenda-integratie', desc: 'De chatbot kan afspraken inplannen in Google Calendar of Outlook. Handig voor intakegesprekken of adviesgesprekken.' },
+          { title: 'Contactgegevens verzamelen', desc: 'Als een vraag niet automatisch beantwoord kan worden, vraagt de chatbot om contactgegevens zodat u kunt terugbellen.' },
+        ].map((item, i) => (
+          <div class={`card p-6 animate-on-scroll delay-${i + 1}`}>
+            <h3 class="font-bold text-navy-900 mb-2">{item.title}</h3>
+            <p class="text-slate-500 text-sm">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- For whom -->
+  <section class="section-padding bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl">
+        <h2 class="heading-lg text-navy-900 mb-6">Voor wie</h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed text-lg">
+          <p>
+            De chatbot is geschikt voor elke organisatie die regelmatig dezelfde vragen krijgt. Denk aan een huisartsenpraktijk die uitleg geeft over openingstijden en verwijzingen, een makelaar die vragen beantwoordt over woningen, of een webshop die helpt met retourzendingen.
+          </p>
+          <p>
+            Het werkt het beste als u al enige documentatie heeft &mdash; een website met informatie, een FAQ of een kennisbank. Daar bouwen wij op voort.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    heading="Benieuwd hoe de chatbot werkt met uw content?"
+    subtitle="Wij zetten een demo op met uw eigen documentatie. Dan ziet u direct wat het doet."
+  />
+</Layout>

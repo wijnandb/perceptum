@@ -3,6 +3,7 @@ const currentYear = new Date().getFullYear();
 
 const navigation = [
   { label: 'Diensten', href: '/diensten/' },
+  { label: 'Producten', href: '/producten/' },
   { label: 'Projecten', href: '/projecten/' },
   { label: 'Over Perceptum', href: '/over/' },
   { label: 'Inzichten', href: '/inzichten/' },
@@ -10,10 +11,11 @@ const navigation = [
   { label: 'Contact', href: '/contact/' },
 ];
 
-const projects = [
+const products = [
+  { label: 'LiveView Analytics', href: '/producten/analytics/' },
   { label: 'FormBridge', href: '/projecten/formbridge/' },
-  { label: 'Brede School Zuidoost', href: '/projecten/#brede-school' },
-  { label: 'AI Chatbot', href: '/projecten/#chatbot' },
+  { label: 'AI Chatbot', href: '/producten/chatbot/' },
+  { label: 'WebScan', href: '/producten/webscan/' },
 ];
 ---
 
@@ -78,11 +80,11 @@ const projects = [
         </ul>
       </div>
 
-      <!-- Column 3: Projects -->
+      <!-- Column 3: Products -->
       <div>
-        <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Projecten</h3>
+        <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Producten</h3>
         <ul class="space-y-3">
-          {projects.map((item) => (
+          {products.map((item) => (
             <li>
               <a href={item.href} class="text-slate-400 hover:text-white text-sm transition-colors">
                 {item.label}

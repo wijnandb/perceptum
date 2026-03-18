@@ -1,0 +1,100 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CTA from '../../components/CTA.astro';
+
+const products = [
+  {
+    name: 'LiveView Analytics',
+    description: 'Bezoekersstatistieken zonder cookies, zonder tracking, zonder gedoe. Weet wat er op uw website gebeurt, met respect voor de privacy van uw bezoekers.',
+    status: 'Beschikbaar',
+    href: '/producten/analytics/',
+    tags: ['Analytics', 'Privacy', 'GDPR'],
+  },
+  {
+    name: 'FormBridge',
+    description: 'Formulieren-backend voor websites. Uw contactformulier, aanmeldformulier of offerteaanvraag — wij verwerken de inzendingen, u ontvangt de berichten.',
+    status: 'Beschikbaar',
+    href: '/projecten/formbridge/',
+    tags: ['Formulieren', 'API', 'Privacy'],
+  },
+  {
+    name: 'AI Chatbot',
+    description: 'Een chatbot die uw kennisbank doorzoekbaar maakt via gewone taal. Beantwoordt klantvragen op basis van uw eigen documentatie, 24 uur per dag.',
+    status: 'Beschikbaar',
+    href: '/producten/chatbot/',
+    tags: ['AI', 'Klantenservice', 'WhatsApp'],
+  },
+  {
+    name: 'WebScan',
+    description: 'Laat uw website doorlichten op prestaties, beveiliging, vindbaarheid en toegankelijkheid. U ontvangt een helder rapport met concrete verbeterpunten.',
+    status: 'Beschikbaar',
+    href: '/producten/webscan/',
+    tags: ['Audit', 'SEO', 'Beveiliging'],
+  },
+];
+---
+
+<Layout
+  title="Producten"
+  description="Eigen producten van Perceptum: LiveView Analytics, FormBridge, AI Chatbot en WebScan. Software die wij zelf bouwen, zelf gebruiken en aan klanten aanbieden."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <h1 class="heading-xl text-white mb-6">Producten</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Naast werk voor klanten bouwen wij eigen software. Producten die wij zelf dagelijks gebruiken en die wij aanbieden aan organisaties die er baat bij hebben.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl mb-16">
+        <p class="text-lg text-slate-600 leading-relaxed">
+          Wat wij voor klanten bouwen, zetten wij ook voor onszelf in. Dat houdt ons scherp: als een product niet goed genoeg is voor ons eigen gebruik, is het niet goed genoeg om aan te bieden.
+        </p>
+      </div>
+
+      <div class="space-y-8">
+        {products.map((product, i) => (
+          <a href={product.href} class="block group">
+            <div class={`card p-8 animate-on-scroll delay-${i}`}>
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
+                <div class="flex items-center gap-3 flex-wrap">
+                  <h2 class="heading-sm text-navy-900 group-hover:text-accent transition-colors">{product.name}</h2>
+                  <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {product.status}
+                  </span>
+                </div>
+              </div>
+              <p class="text-slate-600 leading-relaxed mb-4">{product.description}</p>
+              <div class="flex flex-wrap gap-2 mb-4">
+                {product.tags.map((tag) => (
+                  <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 font-medium">{tag}</span>
+                ))}
+              </div>
+              <span class="inline-flex items-center gap-1 text-sm font-medium text-accent">
+                Meer over {product.name}
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    heading="Interesse in een van onze producten?"
+    subtitle="Wij leggen graag uit hoe het werkt en of het past bij uw situatie."
+  />
+</Layout>

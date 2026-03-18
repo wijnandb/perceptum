@@ -1,0 +1,106 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CTA from '../../components/CTA.astro';
+---
+
+<Layout
+  title="LiveView Analytics"
+  description="LiveView Analytics — privacy-vriendelijke bezoekersstatistieken voor websites. Geen cookies, geen tracking, wel inzicht. Door Perceptum."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <p class="text-accent font-medium text-sm tracking-wide uppercase mb-4">Product</p>
+      <h1 class="heading-xl text-white mb-6">LiveView Analytics</h1>
+      <p class="text-xl text-slate-300 max-w-2xl">
+        Weet wat er op uw website gebeurt. Zonder cookies, zonder cookiebanner, zonder inbreuk op de privacy van uw bezoekers.
+      </p>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- What it does -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl">
+        <h2 class="heading-lg text-navy-900 mb-6">Wat het doet</h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed text-lg">
+          <p>
+            LiveView Analytics laat zien hoeveel mensen uw website bezoeken, welke pagina's ze bekijken, en waar ze vandaan komen. Dat is het. Geen persoonlijke gegevens, geen profielen, geen tracking over meerdere websites.
+          </p>
+          <p>
+            Het script is kleiner dan 2 KB en vertraagt uw website niet merkbaar. Er worden geen cookies geplaatst, dus u heeft geen cookiebanner nodig. Dat scheelt uw bezoekers een klik en u een hoop GDPR-gedoe.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section-padding bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <h2 class="heading-lg text-navy-900 mb-12">Wat u te zien krijgt</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[
+          { title: 'Bezoekers in real-time', desc: 'Zie wie er nu op uw site is. Handig na een nieuwsbrief, social media-post of campagne.' },
+          { title: 'Paginaweergaven en trends', desc: 'Welke pagina\'s worden het meest bezocht? Wanneer piekt het? Hoe ontwikkelt het zich over tijd?' },
+          { title: 'Verwijzende websites', desc: 'Waar komen uw bezoekers vandaan? Google, social media, een link op een andere site — u ziet het direct.' },
+          { title: 'Land en apparaat', desc: 'Uit welk land komen uw bezoekers en gebruiken ze een telefoon of computer? Geanonimiseerd, niet herleidbaar.' },
+        ].map((item, i) => (
+          <div class={`card p-6 animate-on-scroll delay-${i + 1}`}>
+            <h3 class="font-bold text-navy-900 mb-2">{item.title}</h3>
+            <p class="text-slate-500 text-sm">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <h2 class="heading-lg text-navy-900 mb-12 text-center animate-on-scroll">Hoe het werkt</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          { step: '1', title: 'Script toevoegen', desc: 'E\u00E9n regel code in uw website. Meer is het niet.' },
+          { step: '2', title: 'Data binnenkomt', desc: 'Bezoekersdata wordt direct verwerkt. Geen cookies, geen opslag van IP-adressen.' },
+          { step: '3', title: 'Dashboard bekijken', desc: 'In uw eigen dashboard ziet u direct wat er op uw website gebeurt.' },
+        ].map((item, i) => (
+          <div class={`text-center animate-on-scroll delay-${i + 1}`}>
+            <div class="w-12 h-12 rounded-full gradient-navy text-white font-bold text-lg flex items-center justify-center mx-auto mb-4">
+              {item.step}
+            </div>
+            <h3 class="font-bold text-navy-900 mb-2">{item.title}</h3>
+            <p class="text-sm text-slate-500">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy -->
+  <section class="section-padding bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl">
+        <h2 class="heading-lg text-navy-900 mb-6">Privacy als uitgangspunt</h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed">
+          <p>
+            LiveView Analytics is gebouwd vanuit de overtuiging dat je prima kunt meten hoe een website presteert zonder individuele bezoekers te volgen. Wij slaan geen IP-adressen op, plaatsen geen cookies en delen geen gegevens met derden.
+          </p>
+          <p>
+            Dat maakt het niet alleen prettig voor uw bezoekers, maar ook voor u: geen cookiebanner, geen verwerkersovereenkomst, geen AVG-risico.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    heading="LiveView Analytics proberen?"
+    subtitle="Wij installeren het gratis op uw website zodat u het zelf kunt zien. Bevalt het? Dan spreken we verder."
+  />
+</Layout>
