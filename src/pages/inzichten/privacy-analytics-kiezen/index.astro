@@ -1,0 +1,99 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Hoe kies je privacy-vriendelijke analytics?"
+  description="Google Analytics is niet meer de enige optie. Er zijn alternatieven die geen cookies plaatsen en toch laten zien wat er op uw website gebeurt."
+>
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
+      <div class="flex items-center gap-3 text-xs text-slate-400 mb-6">
+        <time datetime="2026-03-18">18 maart 2026</time>
+        <span>&middot;</span>
+        <span>4 min leestijd</span>
+      </div>
+      <h1 class="heading-xl text-white mb-6 max-w-3xl">Hoe kies je privacy-vriendelijke analytics?</h1>
+    </div>
+    <div class="relative h-12 md:h-20">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <article class="section-padding">
+    <div class="container-narrow mx-auto max-w-3xl">
+      <div class="prose prose-slate prose-lg max-w-none">
+        <p class="text-xl text-slate-600 leading-relaxed mb-8">
+          De meeste websites draaien Google Analytics. Niet omdat iemand daar bewust voor heeft gekozen, maar omdat het er ooit is neergezet en niemand er meer naar omkijkt. Ondertussen is de wereld veranderd. De AVG is er. Bezoekers klikken cookiebanners weg. En wat u terugkrijgt uit Google Analytics is een dashboard vol ruis waar u eigenlijk nooit in kijkt.
+        </p>
+
+        <h2 class="heading-md text-navy-900 mt-12 mb-4">Het probleem met Google Analytics</h2>
+        <p class="text-slate-600 leading-relaxed">
+          Laten we eerlijk zijn over wat Google Analytics doet. Het plaatst cookies op het apparaat van uw bezoeker. Het slaat IP-adressen op. Het volgt mensen over meerdere websites heen. En al die data gaat naar Google — een bedrijf dat zijn geld verdient met advertenties.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Sinds de AVG is dat een juridisch probleem. U moet toestemming vragen, een cookiebanner tonen, en een privacyverklaring bijhouden die uitlegt wat er met die data gebeurt. Veel bezoekers klikken de banner weg zonder akkoord. Het gevolg: u meet maar een deel van uw verkeer, en de cijfers die u wél ziet zijn onbetrouwbaar.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Daar komt bij dat Google Analytics gebouwd is voor marketingteams bij grote bedrijven. De interface is overweldigend. Voor de meeste websites — en dat geldt voor het overgrote deel van het MKB — is negentig procent van de functionaliteit overbodig.
+        </p>
+
+        <h2 class="heading-md text-navy-900 mt-12 mb-4">Wat heeft u eigenlijk nodig?</h2>
+        <p class="text-slate-600 leading-relaxed">
+          Stel uzelf de vraag: wat wilt u weten over uw bezoekers? Voor de meeste organisaties komt het neer op een handvol dingen:
+        </p>
+        <ul class="text-slate-600 leading-relaxed">
+          <li>Hoeveel mensen bezoeken mijn website?</li>
+          <li>Welke pagina's bekijken zij?</li>
+          <li>Waar komen zij vandaan — zoekmachines, social media, andere websites?</li>
+          <li>Groeit mijn verkeer of daalt het?</li>
+        </ul>
+        <p class="text-slate-600 leading-relaxed">
+          Dat is het. Geen funnels, geen cohortanalyses, geen remarketinglijsten. Gewoon helder zicht op wat er op uw website gebeurt. En voor die informatie heeft u geen cookies nodig.
+        </p>
+
+        <h2 class="heading-md text-navy-900 mt-12 mb-4">Hoe werkt analytics zonder cookies?</h2>
+        <p class="text-slate-600 leading-relaxed">
+          Cookieloze analytics werkt fundamenteel anders dan Google Analytics. Er worden geen cookies geplaatst op het apparaat van de bezoeker. Er worden geen IP-adressen opgeslagen. En er wordt geen informatie gedeeld met derden.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          In plaats daarvan worden paginabezoeken geregistreerd als losse gebeurtenissen. Elke keer dat iemand een pagina opent, wordt dat geteld — zonder te onthouden wie die persoon is. De data wordt geaggregeerd: u ziet totalen en trends, geen individuele profielen.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Het resultaat is verrassend bruikbaar. U weet precies welke pagina's populair zijn, waar uw bezoekers vandaan komen, en hoe uw website presteert over tijd. Wat u níet weet is welke specifieke persoon wanneer welke pagina heeft bezocht. En dat is precies het punt: die informatie had u toch niet nodig, en het niet verzamelen ervan bespaart u een cookiebanner en een hoop juridische kopzorgen.
+        </p>
+
+        <h2 class="heading-md text-navy-900 mt-12 mb-4">De markt beweegt</h2>
+        <p class="text-slate-600 leading-relaxed">
+          Er zijn inmiddels meerdere partijen die privacy-vriendelijke analytics aanbieden. Bekende namen zijn Plausible, Fathom en Simple Analytics. Zij laten zien dat er een markt is voor eerlijke, eenvoudige bezoekersstatistieken. Het zijn goede producten.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Toch merkten wij in onze eigen praktijk dat er iets miste. Bij het beheren van websites voor onze klanten wilden wij één plek waar alle statistieken samenkomen — zonder voor elke website een apart abonnement af te sluiten. En wij wilden dat de data in Europa blijft, op onze eigen infrastructuur.
+        </p>
+
+        <h2 class="heading-md text-navy-900 mt-12 mb-4">Wat wij zelf hebben gebouwd</h2>
+        <p class="text-slate-600 leading-relaxed">
+          Vanuit die behoefte hebben wij <a href="/producten/analytics/" class="text-accent hover:underline">LiveView Analytics</a> ontwikkeld. Een analytics-dienst die geen cookies plaatst, geen IP-adressen opslaat, en die draait op Europese servers. Het script dat op uw website wordt geplaatst is kleiner dan één kilobyte — het vertraagt uw site niet.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Het is bewust eenvoudig gehouden. Eén dashboard met de informatie die ertoe doet: paginaweergaven, verwijzende websites, trends over tijd. Geen overweldigende grafieken, geen data waar u niets mee kunt. En omdat er geen cookies worden geplaatst, heeft u geen cookiebanner nodig voor uw analytics.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Wij gebruiken het zelf voor alle websites die wij beheren. Dat is misschien het eerlijkste wat wij erover kunnen zeggen.
+        </p>
+
+        <div class="mt-16 pt-8 border-t border-slate-200">
+          <a href="/inzichten/" class="inline-flex items-center gap-2 text-accent font-medium hover:underline">
+            <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+            Alle inzichten
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+</Layout>

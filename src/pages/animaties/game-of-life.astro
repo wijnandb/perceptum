@@ -1,0 +1,187 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Game of Life" description="Conway's Game of Life — vier simpele regels creëren eindeloze complexiteit. Het bewijs dat structuur uit chaos kan ontstaan.">
+  <section class="gradient-navy relative overflow-hidden -mt-20 pt-20 min-h-[80vh] flex flex-col">
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="animation" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
+    <div class="container-narrow mx-auto px-6 pt-24 pb-8 relative z-10">
+      <a href="/animaties/" class="text-slate-400 text-sm hover:text-accent transition-colors">&larr; Animaties</a>
+      <h1 class="heading-xl text-white mt-4">Game of Life</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">vier regels → eindeloze complexiteit</p>
+    </div>
+    <div class="relative h-12 md:h-20 mt-auto">
+      <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+        <path d="M0 80L720 40L1440 80H0Z" fill="#f8fafc"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="py-16 bg-slate-50">
+    <div class="container-narrow mx-auto px-6 max-w-3xl">
+      <h2 class="heading-lg mb-6">Orde uit chaos</h2>
+
+      <p class="text-slate-600 leading-relaxed mb-4">
+        In 1970 bedacht wiskundige John Conway een simpel experiment: een oneindig raster van cellen die "leven" of "dood" zijn. Elke generatie volgen alle cellen exact dezelfde vier regels:
+      </p>
+
+      <ol class="text-slate-600 leading-relaxed mb-6 space-y-2 list-decimal list-inside">
+        <li><strong>Eenzaamheid:</strong> een levende cel met minder dan 2 buren sterft.</li>
+        <li><strong>Overleving:</strong> een levende cel met 2 of 3 buren leeft door.</li>
+        <li><strong>Overbevolking:</strong> een levende cel met meer dan 3 buren sterft.</li>
+        <li><strong>Geboorte:</strong> een dode cel met precies 3 buren wordt levend.</li>
+      </ol>
+
+      <p class="text-slate-600 leading-relaxed mb-4">
+        Dat is alles. Geen sturing, geen intelligentie, geen ontwerp. Toch ontstaan er patronen die bewegen, zichzelf kopiëren, en zelfs computers kunnen simuleren. Structuren die niemand geprogrammeerd heeft — ze <em>emergeren</em> uit de regels zelf.
+      </p>
+
+      <h3 class="heading-md mt-10 mb-4">Waarom dit op onze website staat</h3>
+
+      <p class="text-slate-600 leading-relaxed mb-4">
+        Bij Perceptum zien we dezelfde dynamiek in digitale systemen. Een goed ontworpen website, een slim geautomatiseerd proces, een chatbot die leert van gesprekken — het zijn allemaal systemen waar simpele regels leiden tot iets dat groter is dan de som der delen.
+      </p>
+
+      <p class="text-slate-600 leading-relaxed mb-4">
+        De Game of Life herinnert ons eraan dat de kracht niet zit in complexe instructies, maar in het vinden van de juiste simpele regels. Dat is wat wij doen: de juiste bouwstenen neerzetten zodat jouw digitale aanwezigheid zichzelf kan ontwikkelen.
+      </p>
+
+      <p class="text-slate-600 leading-relaxed">
+        Klik op het raster hierboven om cellen toe te voegen en kijk hoe ze tot leven komen.
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const canvas = document.getElementById('animation') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  let W = 0;
+  let H = 0;
+  const CELL_SIZE = 8;
+  let cols = 0;
+  let rows = 0;
+  let grid: boolean[][] = [];
+  let running = true;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const newCols = Math.ceil(W / CELL_SIZE);
+    const newRows = Math.ceil(H / CELL_SIZE);
+
+    // Preserve existing cells on resize
+    const newGrid: boolean[][] = [];
+    for (let y = 0; y < newRows; y++) {
+      newGrid[y] = [];
+      for (let x = 0; x < newCols; x++) {
+        newGrid[y][x] = (y < rows && x < cols) ? grid[y]?.[x] ?? false : false;
+      }
+    }
+    cols = newCols;
+    rows = newRows;
+    grid = newGrid;
+  }
+
+  function seed() {
+    grid = [];
+    for (let y = 0; y < rows; y++) {
+      grid[y] = [];
+      for (let x = 0; x < cols; x++) {
+        grid[y][x] = Math.random() < 0.3;
+      }
+    }
+  }
+
+  function countNeighbors(x: number, y: number): number {
+    let count = 0;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = (x + dx + cols) % cols;
+        const ny = (y + dy + rows) % rows;
+        if (grid[ny][nx]) count++;
+      }
+    }
+    return count;
+  }
+
+  function step() {
+    const next: boolean[][] = [];
+    for (let y = 0; y < rows; y++) {
+      next[y] = [];
+      for (let x = 0; x < cols; x++) {
+        const n = countNeighbors(x, y);
+        const alive = grid[y][x];
+        next[y][x] = alive ? (n === 2 || n === 3) : (n === 3);
+      }
+    }
+    grid = next;
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        if (grid[y][x]) {
+          const age = countNeighbors(x, y);
+          const alpha = 0.3 + age * 0.08;
+          ctx.fillStyle = `rgba(147, 197, 253, ${Math.min(alpha, 0.85)})`;
+          ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+        }
+      }
+    }
+  }
+
+  // Click to toggle cells
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / CELL_SIZE);
+    const y = Math.floor((e.clientY - rect.top) / CELL_SIZE);
+    if (y >= 0 && y < rows && x >= 0 && x < cols) {
+      // Place a glider at click position
+      const glider = [[0,1],[1,2],[2,0],[2,1],[2,2]];
+      glider.forEach(([dy, dx]) => {
+        const gy = (y + dy) % rows;
+        const gx = (x + dx) % cols;
+        grid[gy][gx] = true;
+      });
+    }
+  });
+
+  resize();
+  seed();
+  window.addEventListener('resize', resize);
+
+  let frameCount = 0;
+  function animate() {
+    frameCount++;
+    if (frameCount % 6 === 0) { // ~10 generations per second at 60fps
+      step();
+    }
+    draw();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  // Re-seed if everything dies
+  setInterval(() => {
+    let alive = 0;
+    for (let y = 0; y < rows && alive < 10; y++) {
+      for (let x = 0; x < cols && alive < 10; x++) {
+        if (grid[y][x]) alive++;
+      }
+    }
+    if (alive < 10) seed();
+  }, 3000);
+</script>

@@ -222,10 +222,95 @@ import CTA from '../components/CTA.astro';
     </div>
   </section>
 
+  <!-- Brand distribution -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto">
+      <div class="max-w-3xl">
+        <h2 class="heading-lg text-navy-900 mb-6 animate-on-scroll">Onze producten in de praktijk</h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed text-lg animate-on-scroll delay-1">
+          <p>
+            Onze software wordt ingezet via regionale merken die dicht bij hun klanten staan. <a href="https://bollenstreekdigitaal.nl" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">Bollenstreek Digitaal</a> bedient ondernemers in de Bollenstreek met websites, analytics en chatbots &mdash; aangedreven door Perceptum-technologie.
+          </p>
+          <p>
+            Dat model werkt voor ons omdat het ons scherp houdt: als een product niet goed genoeg is voor dagelijks gebruik door dertien klanten, is het niet goed genoeg.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lab / Animaties -->
+  <section class="py-16 px-6 bg-slate-100/50">
+    <div class="container-narrow mx-auto">
+      <a href="/animaties/" class="block group">
+        <div class="card p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6 animate-on-scroll">
+          <div class="w-14 h-14 rounded-2xl gradient-navy flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="heading-sm text-navy-900 group-hover:text-accent transition-colors mb-2">Lab: wiskundige animaties</h3>
+            <p class="text-slate-500">
+              Twintig interactieve visualisaties &mdash; van Fibonacci-spiralen tot zwermgedrag. Gebouwd uit nieuwsgierigheid, in de browser.
+            </p>
+          </div>
+          <svg class="w-6 h-6 text-slate-300 group-hover:text-accent transition-colors shrink-0 ml-auto hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Email capture -->
+  <section class="section-padding">
+    <div class="container-narrow mx-auto max-w-xl text-center">
+      <h2 class="heading-md text-navy-900 mb-4 animate-on-scroll">Blijf op de hoogte</h2>
+      <p class="text-slate-500 mb-8 animate-on-scroll delay-1">
+        Af en toe sturen wij een kort bericht over wat wij bouwen en leren. Geen spam, geen verkooppraatje. Maximaal twee keer per maand.
+      </p>
+      <form id="newsletter-form" class="flex flex-col sm:flex-row gap-3 animate-on-scroll delay-2">
+        <input type="email" name="email" required placeholder="Uw e-mailadres"
+          class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all outline-none" />
+        <input type="hidden" name="_gotcha" value="" />
+        <button type="submit" class="btn-primary justify-center whitespace-nowrap">
+          Aanmelden
+        </button>
+      </form>
+      <div id="newsletter-success" class="hidden mt-4 p-4 rounded-xl bg-emerald-50 text-emerald-700 font-medium">
+        Bedankt! U hoort van ons.
+      </div>
+      <div id="newsletter-error" class="hidden mt-4 p-4 rounded-xl bg-red-50 text-red-700 font-medium">
+        Er ging iets mis. Probeer het later opnieuw.
+      </div>
+    </div>
+  </section>
+
   <CTA />
 </Layout>
 
 <script>
+  // Newsletter form
+  const nlForm = document.getElementById('newsletter-form') as HTMLFormElement;
+  nlForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(nlForm));
+    data._ts = String(Date.now());
+    data._source = 'newsletter';
+    try {
+      await fetch('https://forms.bollenstreekdigitaal.nl/api/v1/s/f_e6de503e1d49', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      nlForm.style.display = 'none';
+      document.getElementById('newsletter-success')?.classList.remove('hidden');
+    } catch {
+      document.getElementById('newsletter-error')?.classList.remove('hidden');
+    }
+  });
+
   // Randomize planet starting positions by setting negative begin offsets
   document.querySelectorAll('#solar-system animateMotion').forEach((anim) => {
     const dur = parseFloat(anim.getAttribute('dur') || '10');

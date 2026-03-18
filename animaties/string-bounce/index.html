@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>String Bounce</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #060d18;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+
+    #overlay {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: rgba(6, 13, 24, 0.95);
+      z-index: 100;
+      cursor: pointer;
+      transition: opacity 0.4s;
+    }
+    #overlay.hidden { opacity: 0; pointer-events: none; }
+    #overlay h1 {
+      font-size: 2.5rem; color: #93c5fd;
+      margin-bottom: 0.5rem; font-weight: 300;
+    }
+    #overlay p {
+      font-size: 1.1rem; color: #64748b;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    #controls {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 48px;
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      background: rgba(6, 13, 24, 0.85);
+      border-top: 1px solid rgba(147, 197, 253, 0.15);
+      z-index: 50;
+      padding: 0 16px;
+    }
+    #controls button {
+      background: rgba(147, 197, 253, 0.12);
+      border: 1px solid rgba(147, 197, 253, 0.25);
+      color: #93c5fd; border-radius: 6px;
+      padding: 6px 14px; font-size: 0.8rem;
+      cursor: pointer; transition: background 0.2s;
+    }
+    #controls button:hover { background: rgba(147, 197, 253, 0.25); }
+    #controls select {
+      background: rgba(147, 197, 253, 0.12);
+      border: 1px solid rgba(147, 197, 253, 0.25);
+      color: #93c5fd; border-radius: 6px;
+      padding: 5px 8px; font-size: 0.8rem;
+      cursor: pointer;
+    }
+    #controls select option {
+      background: #0c1929; color: #93c5fd;
+    }
+    #controls .slider-group {
+      display: flex; align-items: center; gap: 6px;
+      color: #64748b; font-size: 0.75rem;
+    }
+    #controls input[type="range"] {
+      width: 80px; accent-color: #93c5fd;
+    }
+    #controls .stats {
+      color: #475569; font-size: 0.7rem;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay">
+    <h1>String Bounce</h1>
+    <p>Tap anywhere to start</p>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <div id="controls">
+    <button id="btn-drop">Drop Ball</button>
+    <button id="btn-clear">Clear All</button>
+    <select id="preset-select">
+      <option value="">Songs...</option>
+    </select>
+    <div class="slider-group">
+      <label for="rate-slider">Auto:</label>
+      <input type="range" id="rate-slider" min="0" max="5" step="0.5" value="1" />
+      <span id="rate-value">1/s</span>
+    </div>
+    <div class="stats">
+      <span id="stat-balls">0</span> balls &middot;
+      <span id="stat-strings">0</span> strings
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
