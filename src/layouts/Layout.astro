@@ -52,6 +52,11 @@ const fullTitle = title === 'Home' ? 'Perceptum — Technologie die Werkt' : `${
     <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
     <meta name="theme-color" content="#0c1929" />
 
+    <!-- Security headers (via meta for GitHub Pages) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
     <!-- Structured Data: Organization -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
