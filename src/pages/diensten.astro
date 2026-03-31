@@ -10,10 +10,17 @@ import CTA from '../components/CTA.astro';
   <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
     <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
     <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
-      <h1 class="heading-xl text-white mb-6">Wat wij doen</h1>
-      <p class="text-xl text-slate-300 max-w-2xl">
-        Wij bouwen software en automatiseren werkprocessen. Zodat mensen zich kunnen richten op het werk waar ze goed in zijn en plezier aan beleven.
-      </p>
+      <div class="flex items-center gap-8">
+        <div class="flex-1">
+          <h1 class="heading-xl text-white mb-6">Wat wij doen</h1>
+          <p class="text-xl text-slate-300 max-w-2xl">
+            Wij bouwen software en automatiseren werkprocessen. Zodat mensen zich kunnen richten op het werk waar ze goed in zijn en plezier aan beleven.
+          </p>
+        </div>
+        <div class="hidden md:block w-72 h-72 lg:w-96 lg:h-96 shrink-0 relative">
+          <canvas id="spirograph" class="w-full h-full"></canvas>
+        </div>
+      </div>
     </div>
     <div class="relative h-12 md:h-20">
       <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
@@ -144,3 +151,108 @@ import CTA from '../components/CTA.astro';
     subtitle="Een kort gesprek is vaak genoeg om te weten of het past. Geen verplichtingen."
   />
 </Layout>
+
+<script>
+  const canvas = document.getElementById('spirograph') as HTMLCanvasElement;
+  if (canvas) {
+    const ctx = canvas.getContext('2d')!;
+
+    function resize() {
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = canvas.offsetHeight * 2;
+      ctx.scale(2, 2);
+    }
+    resize();
+
+    const patterns = [
+      { R: 200, r: 80, d: 60 },
+      { R: 200, r: 130, d: 75 },
+      { R: 200, r: 55, d: 50 },
+      { R: 200, r: 105, d: 90 },
+      { R: 200, r: 70, d: 45 },
+      { R: 200, r: 95, d: 80 },
+    ];
+
+    let patternIndex = 0;
+    let t = 0;
+    let fadeAlpha = 1;
+    let phase: 'drawing' | 'fading' | 'waiting' = 'drawing';
+    let waitFrames = 0;
+    let points: { x: number; y: number }[] = [];
+
+    function gcd(a: number, b: number): number {
+      a = Math.abs(Math.round(a));
+      b = Math.abs(Math.round(b));
+      while (b) { [a, b] = [b, a % b]; }
+      return a;
+    }
+
+    function getMaxT(R: number, r: number): number {
+      return (r / gcd(R, r)) * 2 * Math.PI;
+    }
+
+    function draw() {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const p = patterns[patternIndex];
+      const scale = Math.min(w, h) / 600;
+      const R = p.R * scale;
+      const r = p.r * scale;
+      const d = p.d * scale;
+      const maxT = getMaxT(p.R, p.r);
+
+      if (phase === 'drawing') {
+        for (let i = 0; i < 2; i++) {
+          if (t <= maxT + 0.1) {
+            const x = cx + (R - r) * Math.cos(t) + d * Math.cos(((R - r) / r) * t);
+            const y = cy + (R - r) * Math.sin(t) - d * Math.sin(((R - r) / r) * t);
+            points.push({ x, y });
+            t += 0.04;
+          }
+        }
+        if (t > maxT + 0.1) { phase = 'fading'; fadeAlpha = 1; }
+      }
+
+      if (phase === 'fading') {
+        fadeAlpha -= 0.008;
+        if (fadeAlpha <= 0) { phase = 'waiting'; waitFrames = 30; }
+      }
+
+      if (phase === 'waiting') {
+        waitFrames--;
+        if (waitFrames <= 0) {
+          patternIndex = (patternIndex + 1) % patterns.length;
+          t = 0; points = []; fadeAlpha = 1; phase = 'drawing';
+        }
+      }
+
+      if (points.length > 1) {
+        const alpha = phase === 'fading' ? fadeAlpha : 1;
+        for (let i = 1; i < points.length; i++) {
+          const segAlpha = (i / points.length) * 0.8 * alpha;
+          ctx.beginPath();
+          ctx.moveTo(points[i - 1].x, points[i - 1].y);
+          ctx.lineTo(points[i].x, points[i].y);
+          ctx.strokeStyle = `rgba(59, 130, 246, ${segAlpha})`;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+        if (phase === 'drawing' && points.length > 0) {
+          const last = points[points.length - 1];
+          ctx.beginPath();
+          ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(251, 191, 36, 0.9)';
+          ctx.fill();
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  }
+</script>
