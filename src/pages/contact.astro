@@ -9,10 +9,17 @@ import Layout from '../layouts/Layout.astro';
   <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
     <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
     <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
-      <h1 class="heading-xl text-white mb-6">Contact</h1>
-      <p class="text-xl text-slate-300 max-w-2xl">
-        U spreekt direct met Wijnand. Geen salesafdeling, geen wachtlijst.
-      </p>
+      <div class="flex items-center gap-8">
+        <div class="flex-1">
+          <h1 class="heading-xl text-white mb-6">Contact</h1>
+          <p class="text-xl text-slate-300 max-w-2xl">
+            U spreekt direct met Wijnand. Geen salesafdeling, geen wachtlijst.
+          </p>
+        </div>
+        <div class="hidden md:block w-72 h-72 lg:w-96 lg:h-96 shrink-0 relative">
+          <canvas id="geo-spirograph" class="w-full h-full"></canvas>
+        </div>
+      </div>
     </div>
     <div class="relative h-12 md:h-20">
       <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
@@ -177,4 +184,82 @@ import Layout from '../layouts/Layout.astro';
       document.getElementById('contact-error')?.classList.remove('hidden');
     }
   });
+
+  // Geometric Spirograph
+  const geoCanvas = document.getElementById('geo-spirograph') as HTMLCanvasElement;
+  if (geoCanvas) {
+    const gCtx = geoCanvas.getContext('2d')!;
+
+    type DrawFn = (ctx: CanvasRenderingContext2D, radius: number, sides?: number) => void;
+    const figs: Record<string, DrawFn> = {
+      polygon(ctx, radius, sides = 4) { ctx.beginPath(); for (let i = 0; i <= sides; i++) { const a = (Math.PI * 2 * i) / sides - Math.PI / 2; const x = radius * Math.cos(a), y = radius * Math.sin(a); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.closePath(); },
+      circle(ctx, radius) { ctx.beginPath(); ctx.arc(radius * 0.5, 0, radius * 0.5, 0, Math.PI * 2); ctx.closePath(); },
+      ellipse(ctx, radius) { ctx.beginPath(); ctx.ellipse(0, 0, radius, radius * 0.4, 0, 0, Math.PI * 2); ctx.closePath(); },
+      star(ctx, radius) { ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = (Math.PI * 2 * i) / 10 - Math.PI / 2, r = i % 2 === 0 ? radius : radius * 0.4; i === 0 ? ctx.moveTo(r * Math.cos(a), r * Math.sin(a)) : ctx.lineTo(r * Math.cos(a), r * Math.sin(a)); } ctx.closePath(); },
+      arc(ctx, radius) { ctx.beginPath(); ctx.arc(radius * 0.4, 0, radius * 0.6, -Math.PI * 0.5, Math.PI * 0.5); },
+      crescent(ctx, radius) { ctx.beginPath(); ctx.arc(0, 0, radius, -Math.PI * 0.4, Math.PI * 0.4); ctx.arc(radius * 0.3, 0, radius * 0.75, Math.PI * 0.35, -Math.PI * 0.35, true); ctx.closePath(); },
+      lemniscate(ctx, radius) { ctx.beginPath(); for (let i = 0; i <= 80; i++) { const t = (Math.PI * 2 * i) / 80, d = 1 + Math.sin(t) ** 2, x = (radius * Math.cos(t)) / d, y = (radius * Math.sin(t) * Math.cos(t)) / d; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.closePath(); },
+    };
+
+    interface Pat { figure: string; sides?: number; angle: number; }
+    const pats: Pat[] = [
+      { figure: 'polygon', sides: 4, angle: 10 }, { figure: 'circle', angle: 30 },
+      { figure: 'ellipse', angle: 12 }, { figure: 'star', angle: 24 },
+      { figure: 'arc', angle: 12 }, { figure: 'crescent', angle: 18 },
+      { figure: 'lemniscate', angle: 15 }, { figure: 'polygon', sides: 3, angle: 15 },
+      { figure: 'polygon', sides: 6, angle: 9 }, { figure: 'star', angle: 9 },
+    ];
+
+    let pIdx = 0, step = 0;
+    let gPhase: 'drawing' | 'holding' | 'fading' | 'waiting' = 'drawing';
+    let gFade = 1, gHold = 0, gWait = 0;
+    let off: HTMLCanvasElement, oCtx: CanvasRenderingContext2D;
+
+    function gInit() {
+      const w = geoCanvas.width, h = geoCanvas.height;
+      off = document.createElement('canvas'); off.width = w; off.height = h;
+      oCtx = off.getContext('2d')!; oCtx.clearRect(0, 0, w, h);
+      step = 0; gPhase = 'drawing'; gFade = 1;
+    }
+
+    function gResize() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = geoCanvas.offsetWidth, h = geoCanvas.offsetHeight;
+      geoCanvas.width = w * dpr; geoCanvas.height = h * dpr;
+      gCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      gInit();
+    }
+    gResize();
+    window.addEventListener('resize', gResize);
+
+    function gDraw() {
+      const w = geoCanvas.offsetWidth, h = geoCanvas.offsetHeight;
+      const p = pats[pIdx], total = 360 / p.angle;
+      const cx = w / 2, cy = h / 2, radius = Math.min(w, h) * 0.35;
+
+      gCtx.clearRect(0, 0, w, h);
+
+      if (gPhase === 'drawing') {
+        if (step < total) {
+          const rot = (step * p.angle * Math.PI) / 180;
+          const hue = (step / total) * 360;
+          oCtx.save(); oCtx.translate(cx, cy); oCtx.rotate(rot); oCtx.globalAlpha = 0.7;
+          oCtx.strokeStyle = `hsl(${hue}, 70%, 60%)`; oCtx.lineWidth = 1.5;
+          if (p.figure === 'polygon') figs.polygon(oCtx, radius, p.sides);
+          else figs[p.figure]?.(oCtx, radius);
+          oCtx.stroke(); oCtx.globalAlpha = 1; oCtx.restore();
+          step++;
+        } else { gPhase = 'holding'; gHold = 90; }
+      } else if (gPhase === 'holding') { gHold--; if (gHold <= 0) gPhase = 'fading'; }
+      else if (gPhase === 'fading') { gFade -= 0.02; if (gFade <= 0) { gPhase = 'waiting'; gWait = 20; } }
+      else if (gPhase === 'waiting') { gWait--; if (gWait <= 0) { pIdx = (pIdx + 1) % pats.length; gInit(); } }
+
+      gCtx.globalAlpha = Math.max(0, gFade);
+      gCtx.drawImage(off, 0, 0, off.width, off.height, 0, 0, w, h);
+      gCtx.globalAlpha = 1;
+
+      requestAnimationFrame(gDraw);
+    }
+    gDraw();
+  }
 </script>
