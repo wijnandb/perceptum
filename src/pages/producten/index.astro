@@ -39,7 +39,9 @@ const products = [
   description="Eigen producten van Perceptum: LiveView Analytics, FormBridge, AI Chatbot en WebScan. Software die wij zelf bouwen, zelf gebruiken en aan klanten aanbieden."
 >
   <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
-    <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="absolute inset-0 overflow-hidden">
+      <canvas id="flocking" class="absolute inset-0 w-full h-full"></canvas>
+    </div>
     <div class="container-narrow mx-auto px-6 py-20 md:py-28 relative z-10">
       <h1 class="heading-xl text-white mb-6">Producten</h1>
       <p class="text-xl text-slate-300 max-w-2xl">
@@ -98,3 +100,114 @@ const products = [
     subtitle="Wij leggen graag uit hoe het werkt en of het past bij uw situatie."
   />
 </Layout>
+
+<script>
+  const canvas = document.getElementById('flocking') as HTMLCanvasElement;
+  if (canvas) {
+    const ctx = canvas.getContext('2d')!;
+    let W = 0, H = 0;
+
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      W = rect.width;
+      H = rect.height;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const BOID_COUNT = 120;
+    const PERCEPTION = 50;
+    const MAX_SPEED = 2.8;
+    const MAX_FORCE = 0.05;
+
+    interface Boid { x: number; y: number; vx: number; vy: number; leader: boolean; }
+    const boids: Boid[] = [];
+
+    for (let i = 0; i < BOID_COUNT; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1 + Math.random() * 1.5;
+      boids.push({
+        x: Math.random() * (W || 800),
+        y: Math.random() * (H || 600),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        leader: i % 10 === 0,
+      });
+    }
+
+    function limit(vx: number, vy: number, max: number): [number, number] {
+      const mag = Math.sqrt(vx * vx + vy * vy);
+      return mag > max && mag > 0 ? [(vx / mag) * max, (vy / mag) * max] : [vx, vy];
+    }
+
+    function update() {
+      for (let i = 0; i < boids.length; i++) {
+        const b = boids[i];
+        let alignX = 0, alignY = 0, cohX = 0, cohY = 0, sepX = 0, sepY = 0, neighbors = 0;
+
+        for (let j = 0; j < boids.length; j++) {
+          if (i === j) continue;
+          const o = boids[j];
+          let dx = o.x - b.x, dy = o.y - b.y;
+          if (dx > W / 2) dx -= W; if (dx < -W / 2) dx += W;
+          if (dy > H / 2) dy -= H; if (dy < -H / 2) dy += H;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < PERCEPTION && dist > 0) {
+            neighbors++;
+            alignX += o.vx; alignY += o.vy;
+            cohX += dx; cohY += dy;
+            sepX -= dx / dist; sepY -= dy / dist;
+          }
+        }
+
+        let ax = 0, ay = 0;
+        if (neighbors > 0) {
+          alignX /= neighbors; alignY /= neighbors;
+          let m = Math.sqrt(alignX * alignX + alignY * alignY);
+          if (m > 0) { alignX = (alignX / m) * MAX_SPEED - b.vx; alignY = (alignY / m) * MAX_SPEED - b.vy; [alignX, alignY] = limit(alignX, alignY, MAX_FORCE); }
+          cohX /= neighbors; cohY /= neighbors;
+          m = Math.sqrt(cohX * cohX + cohY * cohY);
+          if (m > 0) { cohX = (cohX / m) * MAX_SPEED - b.vx; cohY = (cohY / m) * MAX_SPEED - b.vy; [cohX, cohY] = limit(cohX, cohY, MAX_FORCE); }
+          sepX /= neighbors; sepY /= neighbors;
+          m = Math.sqrt(sepX * sepX + sepY * sepY);
+          if (m > 0) { sepX = (sepX / m) * MAX_SPEED - b.vx; sepY = (sepY / m) * MAX_SPEED - b.vy; [sepX, sepY] = limit(sepX, sepY, MAX_FORCE); }
+          ax = alignX + cohX + sepX * 1.5;
+          ay = alignY + cohY + sepY * 1.5;
+        }
+
+        b.vx += ax; b.vy += ay;
+        [b.vx, b.vy] = limit(b.vx, b.vy, MAX_SPEED);
+        b.x += b.vx; b.y += b.vy;
+        if (b.x < 0) b.x += W; if (b.x > W) b.x -= W;
+        if (b.y < 0) b.y += H; if (b.y > H) b.y -= H;
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (const b of boids) {
+        const angle = Math.atan2(b.vy, b.vx);
+        const size = b.leader ? 7 : 5;
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.moveTo(size, 0);
+        ctx.lineTo(-size * 0.6, -size * 0.4);
+        ctx.lineTo(-size * 0.3, 0);
+        ctx.lineTo(-size * 0.6, size * 0.4);
+        ctx.closePath();
+        ctx.fillStyle = b.leader ? 'rgba(251, 191, 36, 0.9)' : 'rgba(59, 130, 246, 0.7)';
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function loop() { update(); draw(); requestAnimationFrame(loop); }
+    requestAnimationFrame(loop);
+  }
+</script>
