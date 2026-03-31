@@ -161,7 +161,8 @@ import Layout from '../layouts/Layout.astro';
   const form = document.getElementById('contact-form') as HTMLFormElement;
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(form));
+    const data: Record<string, string> = {};
+    new FormData(form).forEach((v, k) => { data[k] = String(v); });
     data._ts = String(Date.now());
     try {
       const response = await fetch('https://forms.bollenstreekdigitaal.nl/api/v1/s/f_e6de503e1d49', {
