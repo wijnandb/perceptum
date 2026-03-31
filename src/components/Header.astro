@@ -13,13 +13,8 @@ const navItems = [
 >
   <nav class="container-wide mx-auto px-6 flex items-center justify-between h-20">
     <!-- Logo -->
-    <a href="/" class="flex items-center gap-3 group">
-      <div class="w-9 h-9 rounded-lg gradient-navy flex items-center justify-center shadow-lg shadow-navy-900/20 group-hover:shadow-navy-900/40 transition-shadow">
-        <span class="text-white font-bold text-lg">P</span>
-      </div>
-      <span id="logo-text" class="text-xl font-bold text-white tracking-tight">
-        Perceptum
-      </span>
+    <a href="/" class="flex items-center group">
+      <img id="site-logo" src="/perceptum-logo.png" alt="Perceptum — Slim Werken" class="h-10 transition-all duration-300 brightness-0 invert" />
     </a>
 
     <!-- Desktop Nav -->
@@ -82,7 +77,7 @@ const navItems = [
   const bar3 = document.getElementById('bar3');
   let menuOpen = false;
 
-  const logoText = document.getElementById('logo-text');
+  const siteLogo = document.getElementById('site-logo');
   const navLinks = header?.querySelectorAll('.nav-link');
   const bars = [bar1, bar2, bar3];
 
@@ -91,13 +86,13 @@ const navItems = [
     if (window.scrollY > 40) {
       header?.classList.add('bg-white/90', 'backdrop-blur-lg', 'shadow-sm', 'border-b', 'border-slate-200/60');
       header?.classList.remove('bg-transparent');
-      logoText?.classList.replace('text-white', 'text-navy-900');
+      siteLogo?.classList.remove('brightness-0', 'invert');
       navLinks?.forEach(l => { l.classList.replace('text-slate-200', 'text-slate-600'); });
       bars.forEach(b => { b?.classList.replace('bg-white', 'bg-navy-900'); });
     } else {
       header?.classList.remove('bg-white/90', 'backdrop-blur-lg', 'shadow-sm', 'border-b', 'border-slate-200/60');
       header?.classList.add('bg-transparent');
-      logoText?.classList.replace('text-navy-900', 'text-white');
+      siteLogo?.classList.add('brightness-0', 'invert');
       navLinks?.forEach(l => { l.classList.replace('text-slate-600', 'text-slate-200'); });
       bars.forEach(b => { b?.classList.replace('bg-navy-900', 'bg-white'); });
     }
