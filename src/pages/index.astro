@@ -268,15 +268,18 @@ import CTA from '../components/CTA.astro';
   const nlForm = document.getElementById('newsletter-form') as HTMLFormElement;
   nlForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(nlForm));
-    data._ts = String(Date.now());
-    data._source = 'newsletter';
+    const formData: Record<string, string> = {};
+    new FormData(nlForm).forEach((v, k) => { formData[k] = String(v); });
+    formData.naam = 'Nieuwsbrief aanmelding';
+    formData.bericht = 'Aanmelding via homepage';
+    formData._ts = String(Date.now());
     try {
-      await fetch('https://forms.bollenstreekdigitaal.nl/api/v1/s/f_e6de503e1d49', {
+      const res = await fetch('https://forms.bollenstreekdigitaal.nl/api/v1/s/f_e6de503e1d49', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formData),
       });
+      if (!res.ok) throw new Error('Server error');
       nlForm.style.display = 'none';
       document.getElementById('newsletter-success')?.classList.remove('hidden');
     } catch {
