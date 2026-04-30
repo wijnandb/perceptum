@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout
   title="Privacy"
-  description="Privacyverklaring van Perceptum. Hoe wij omgaan met uw gegevens, welke data wij verzamelen en uw rechten onder de AVG."
+  description="Privacyverklaring van Perceptum B.V. Hoe wij omgaan met uw gegevens, welke data wij verzamelen en uw rechten onder de AVG. Inclusief Google Business Profile-koppeling voor onze Local Presence-dienst."
 >
   <section class="gradient-navy relative overflow-hidden -mt-20 pt-20">
     <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 40px 40px;"></div>
@@ -12,6 +12,9 @@ import Layout from '../layouts/Layout.astro';
       <h1 class="heading-xl text-white mb-6">Privacyverklaring</h1>
       <p class="text-xl text-slate-300 max-w-2xl">
         Hoe Perceptum omgaat met uw gegevens.
+      </p>
+      <p class="mt-4 text-sm text-slate-400">
+        <a href="/en/privacy/" class="hover:text-white underline">English version</a>
       </p>
     </div>
     <div class="relative h-12 md:h-20">
@@ -28,7 +31,7 @@ import Layout from '../layouts/Layout.astro';
         <!-- Intro -->
         <div>
           <p class="text-lg text-slate-600 leading-relaxed">
-            Perceptum B.V. respecteert uw privacy en gaat zorgvuldig om met persoonsgegevens. In deze verklaring leest u welke gegevens wij verzamelen, waarom en wat uw rechten zijn.
+            Perceptum B.V. respecteert uw privacy en gaat zorgvuldig om met persoonsgegevens. In deze verklaring leest u welke gegevens wij verzamelen, waarom, en wat uw rechten zijn — zowel als bezoeker van deze website als wanneer u onze klant bent of via één van onze klanten met onze tools in aanraking komt.
           </p>
         </div>
 
@@ -37,7 +40,8 @@ import Layout from '../layouts/Layout.astro';
           <h2 class="heading-md text-navy-900 mb-4">Verantwoordelijke</h2>
           <div class="text-slate-600 leading-relaxed space-y-1">
             <p><strong>Perceptum B.V.</strong></p>
-            <p>KvK: 76903885</p>
+            <p>Gooweg 14, 2203 AB Noordwijk</p>
+            <p>KvK: 76903885 &middot; BTW: NL860833306B01</p>
             <p>E-mail: <a href="mailto:wijnand@perceptum.nl" class="text-accent hover:underline">wijnand@perceptum.nl</a></p>
             <p>Telefoon: <a href="tel:+31712032103" class="text-accent hover:underline">071 - 203 2103</a></p>
           </div>
@@ -48,7 +52,7 @@ import Layout from '../layouts/Layout.astro';
           <h2 class="heading-md text-navy-900 mb-4">Websitebezoek en analytics</h2>
           <div class="text-slate-600 leading-relaxed space-y-4">
             <p>
-              Voor het bijhouden van bezoekersstatistieken gebruiken wij <strong>LiveView Analytics</strong>, een privacy-vriendelijke analysetool. Deze tool:
+              Voor het bijhouden van bezoekersstatistieken gebruiken wij <strong>LiveView Analytics</strong>, een privacy-vriendelijke analysetool die wij zelf hebben gebouwd. Deze tool:
             </p>
             <ul class="list-disc list-inside space-y-2 pl-2">
               <li>Plaatst <strong>geen cookies</strong> op uw apparaat</li>
@@ -82,6 +86,70 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
+        <!-- Klantgegevens -->
+        <div>
+          <h2 class="heading-md text-navy-900 mb-4">Wanneer u onze klant bent</h2>
+          <div class="text-slate-600 leading-relaxed space-y-4">
+            <p>
+              Voor klanten verwerken wij naam, e-mailadres, bedrijfsnaam, KvK-nummer, adres en telefoonnummer ten behoeve van het uitvoeren van de overeenkomst en de fiscale administratie. Inhoud die uw bezoekers via uw website achterlaten (formulier-inzendingen, chatberichten) bewaren wij zo lang u onze klant bent en zoals u die data nodig heeft.
+            </p>
+            <p>
+              <strong>Bewaartermijnen:</strong> klant- en factuurgegevens bewaren wij zeven jaar conform de fiscale bewaarplicht. Inhoud van uw bezoekers verwijderen wij uiterlijk 90 dagen na opzegging — of eerder als u dat verzoekt.
+            </p>
+          </div>
+        </div>
+
+        <!-- Verwerkers -->
+        <div>
+          <h2 class="heading-md text-navy-900 mb-4">Met wie wij delen</h2>
+          <div class="text-slate-600 leading-relaxed space-y-4">
+            <p>
+              Wij verkopen geen gegevens. Wij delen alleen met partijen die wij nodig hebben om u te bedienen, en alleen wat zij nodig hebben:
+            </p>
+            <ul class="list-disc list-inside space-y-2 pl-2">
+              <li><strong>Hostingproviders</strong> (Railway, Neon) — voor het draaien van uw website en onze tools. Beide hebben een verwerkersovereenkomst met ons en GDPR-conformiteit voor EU-data.</li>
+              <li><strong>Resend</strong> — voor het versturen van transactionele e-mail (alerts, notificaties).</li>
+              <li><strong>Mollie</strong> — voor betalingen, indien u via factuur of automatische incasso betaalt.</li>
+              <li><strong>Google</strong> — alleen voor wat u zelf via Google's OAuth aan ons heeft toegestaan (zie hieronder).</li>
+            </ul>
+            <p>Wij delen geen gegevens met derden voor advertentie- of marketingdoeleinden.</p>
+          </div>
+        </div>
+
+        <!-- Google Business Profile -->
+        <div>
+          <h2 class="heading-md text-navy-900 mb-4">Google Business Profile-koppeling</h2>
+          <div class="text-slate-600 leading-relaxed space-y-4">
+            <p>
+              Deze sectie geldt alleen wanneer u onze <strong>Local Presence</strong>-dienst aanzet. Zonder die koppeling is alles in deze sectie niet op u van toepassing.
+            </p>
+            <p>
+              Wanneer u uw Google Business Profile aan onze dienst koppelt, vragen wij uw toestemming via Google's eigen OAuth-scherm voor de toegang <code class="text-sm">business.manage</code>. Dit geeft ons toegang tot:
+            </p>
+            <ul class="list-disc list-inside space-y-2 pl-2">
+              <li>Uw bedrijfsinformatie op Google (naam, adres, telefoonnummer, openingstijden, services)</li>
+              <li>Uw foto's en posts op Google Business Profile</li>
+              <li>Reviews die uw klanten op Google over u achterlaten</li>
+              <li>Statistieken over hoe vaak uw profiel wordt bekeken, gebeld of geklikt</li>
+            </ul>
+            <p>
+              Wij vragen <strong>geen</strong> toegang tot andere Google-diensten (geen Gmail, geen Drive, geen Calendar, geen YouTube).
+            </p>
+            <p>
+              <strong>Wat wij ermee doen:</strong> profielinformatie bijhouden, posts opstellen die u eerst per stuk goedkeurt vóór publicatie, concept-antwoorden op reviews die u per stuk goedkeurt, en statistieken weergeven in uw dashboard. Wij doen <strong>geen</strong> bulk-bewerkingen, geen geautomatiseerde posts of antwoorden, en wij vragen geen reviews namens u (dat is in strijd met Google-beleid).
+            </p>
+            <p>
+              <strong>Hoe wij uw toegang opslaan:</strong> de OAuth-tokens die Google ons geeft slaan wij versleuteld op (pgcrypto). De versleutelingssleutel staat in een aparte secret manager.
+            </p>
+            <p>
+              <strong>Hoe u uw toegang intrekt:</strong> via uw account op <code class="text-sm">localpresence.perceptum.nl/settings</code> met één klik, of via Google's eigen accountpagina op <a href="https://myaccount.google.com/permissions" class="text-accent hover:underline">myaccount.google.com/permissions</a>. Wij verwijderen uw OAuth-tokens binnen 24 uur na intrekking.
+            </p>
+            <p>
+              Wij voldoen aan <a href="https://developers.google.com/terms/api-services-user-data-policy" class="text-accent hover:underline">Google API Services User Data Policy</a> en <a href="https://developers.google.com/my-business/content/policies" class="text-accent hover:underline">Google Business Profile API Policies</a>.
+            </p>
+          </div>
+        </div>
+
         <!-- Geen cookies -->
         <div>
           <h2 class="heading-md text-navy-900 mb-4">Cookies</h2>
@@ -95,9 +163,9 @@ import Layout from '../layouts/Layout.astro';
         <!-- Beveiliging -->
         <div>
           <h2 class="heading-md text-navy-900 mb-4">Beveiliging</h2>
-          <div class="text-slate-600 leading-relaxed">
+          <div class="text-slate-600 leading-relaxed space-y-4">
             <p>
-              Wij nemen passende technische en organisatorische maatregelen om uw gegevens te beschermen tegen verlies of onrechtmatig gebruik. De website is beveiligd met een SSL-certificaat (HTTPS).
+              Wij nemen passende technische en organisatorische maatregelen om uw gegevens te beschermen. Alle communicatie via HTTPS, alle databases versleuteld in rust, OAuth-tokens versleuteld met pgcrypto, toegang tot productie-systemen alleen via twee-factor authenticatie. Bij een datalek dat een risico voor uw rechten vormt melden wij dit binnen 72 uur bij de Autoriteit Persoonsgegevens en bij u.
             </p>
           </div>
         </div>
@@ -110,13 +178,15 @@ import Layout from '../layouts/Layout.astro';
               Op grond van de Algemene Verordening Gegevensbescherming (AVG) heeft u het recht om:
             </p>
             <ul class="list-disc list-inside space-y-2 pl-2">
-              <li>Uw persoonsgegevens in te zien</li>
-              <li>Uw gegevens te laten corrigeren of verwijderen</li>
-              <li>Bezwaar te maken tegen de verwerking van uw gegevens</li>
-              <li>Een klacht in te dienen bij de Autoriteit Persoonsgegevens</li>
+              <li>Te vragen welke gegevens wij van u hebben (recht op inzage)</li>
+              <li>Verkeerde gegevens te laten corrigeren (recht op rectificatie)</li>
+              <li>Gegevens te laten verwijderen voor zover wettelijk toegestaan (recht op vergetelheid)</li>
+              <li>De verwerking te beperken of bezwaar te maken</li>
+              <li>Uw gegevens in een leesbaar bestand te ontvangen of laten overdragen (recht op dataportabiliteit)</li>
+              <li>Een klacht in te dienen bij de <a href="https://autoriteitpersoonsgegevens.nl/" class="text-accent hover:underline">Autoriteit Persoonsgegevens</a></li>
             </ul>
             <p>
-              Neem hiervoor contact met ons op via <a href="mailto:wijnand@perceptum.nl" class="text-accent hover:underline">wijnand@perceptum.nl</a>.
+              Stuur uw verzoek naar <a href="mailto:wijnand@perceptum.nl" class="text-accent hover:underline">wijnand@perceptum.nl</a>. Wij reageren binnen één werkdag.
             </p>
           </div>
         </div>
@@ -126,10 +196,10 @@ import Layout from '../layouts/Layout.astro';
           <h2 class="heading-md text-navy-900 mb-4">Wijzigingen</h2>
           <div class="text-slate-600 leading-relaxed">
             <p>
-              Wij kunnen deze privacyverklaring aanpassen. De meest recente versie is altijd beschikbaar op deze pagina.
+              Wij wijzigen deze verklaring alleen wanneer onze diensten of de wetgeving dat vereisen. Substantiële wijzigingen kondigen wij minstens 30 dagen vooraf per e-mail aan onze klanten aan.
             </p>
             <p class="mt-4 text-sm text-slate-400">
-              Laatst bijgewerkt: maart 2026
+              Laatst bijgewerkt: 30 april 2026
             </p>
           </div>
         </div>
